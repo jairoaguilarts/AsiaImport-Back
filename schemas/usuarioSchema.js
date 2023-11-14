@@ -1,16 +1,24 @@
 const mongoose = require('mongoose');
 
 const UsuariosSchema = new mongoose.Schema({
-    nombreUsuario: {
+    correo: {
         type: String,
         required: true,
         unique: true
+    },
+    contrasenia: {
+        type: String,
+        required: true
     },
     firebaseUID: {
         type: String,
         required: true
     },
-    nombreCompleto: {
+    nombre: {
+        type: String,
+        required: true
+    },
+    apellido: {
         type: String,
         required: true
     },
@@ -19,15 +27,20 @@ const UsuariosSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    sexo: {
-        type: String,
-        required: true,
-        enum: ['Masculino', 'Femenino', 'Otro']  
-    },
     carritoCompras: {
         type: [String],
         default: []
-    }
+    },
+    favoritos: {
+        type: [String],
+        default: []
+    },
+    correoConfirmado: { 
+        type: Boolean, 
+        default: false 
+    },
+    tokenConfirmacion: String,
+    expiraToken: Date
 });
 
 const usuario = mongoose.model('usuario', UsuariosSchema);
