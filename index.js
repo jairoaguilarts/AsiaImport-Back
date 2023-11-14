@@ -9,6 +9,7 @@ const { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sig
 const { firebaseConfig, mongoUri } = require('./dbConfig/dbConfig');
 
 const app = express();
+const appFirebase = initializeApp(firebaseConfig);
 
 const PORT = 3000;
 
