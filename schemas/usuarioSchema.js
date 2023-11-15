@@ -39,8 +39,6 @@ const UsuariosSchema = new mongoose.Schema({
         type: Boolean, 
         default: false 
     },
-    tokenConfirmacion: String,
-    expiraToken: Date
 });
 
 const usuario = mongoose.model('usuario', UsuariosSchema);
