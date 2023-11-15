@@ -19,7 +19,7 @@ const { firebaseConfig, mongoUri } = require('./dbConfig/dbConfig');
 const appFirebase = initializeApp(firebaseConfig);
 
 const app = express();
-const PORT = 3001;
+const PORT = 3000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
