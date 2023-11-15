@@ -13,7 +13,7 @@ admin.initializeApp({
 
 // Configuración de Firebase
 const { initializeApp } = require('firebase/app');
-const { getAuth, createUserWithEmailAndPassword, sendEmailVerification } = require('firebase/auth');
+const { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword } = require('firebase/auth');
 const { firebaseConfig, mongoUri } = require('./dbConfig/dbConfig');
 
 const appFirebase = initializeApp(firebaseConfig);
@@ -47,7 +47,6 @@ app.post('/signUp', async (req, res) => {
 
     const nuevoUsuario = new Usuario({ correo, contrasenia, nombre, apellido, numeroIdentidad });
 
-    // Firebase Authentication
     const auth = getAuth();
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, correo, contrasenia);
@@ -65,18 +64,47 @@ app.post('/signUp', async (req, res) => {
   }
 });
 
-app.get('/confirmEmail', async (req, res) => {
-  const { uid } = req.body;
+app.post('/logIn', async (req, res) => {
+  const { correo, contrasenia } = req.body;
   try {
-    const userRecord = await admin.auth().getUser(uid);
-    if (userRecord.emailVerified) {
-      await Usuario.updateOne({ firebaseUID: uid }, { correoConfirmado: true });
-      res.send('Correo confirmado con éxito');
-    } else {
-      res.status(400).send('Correo no verificado');
+    if (!correo.trim() || !contrasenia.trim()) {
+      return res.status(400).json({ error: 'Error falta el Correo o Contraseña ' });
     }
+    const auth = getAuth();
+    let firebaseUID = '';
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, correo, contrasenia);
+      const user = userCredential.user;
+      firebaseUID = user.uid;
+    } catch (error) {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      return res.status(500).send({
+        "msg": "Credenciales incorrectas"
+      });
+    }
+
+    const usuario = await Usuario.findOne({ firebaseUID });
+
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    if (!usuario.emailVerified) { 
+      return res.status(401).json({ error: 'Correo electrónico no verificado' }); 
+    }
+
+    res.json({
+      success: true,
+      usuario: {
+        nombre: usuario.nombre,
+        apellido: usuario.apellido,
+        correo: usuario.correo,
+        firebaseUID: usuario.firebaseUID
+      }
+    });
   } catch (error) {
-    res.status(500).send('Error al confirmar el correo: ' + error.message);
+    console.log('Error al obtener usuarios:', error);
+    res.status(500).json({ error: 'Error al obtener usuarios' });
   }
 });
 

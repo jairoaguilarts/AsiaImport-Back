@@ -34,11 +34,7 @@ const UsuariosSchema = new mongoose.Schema({
     favoritos: {
         type: [String],
         default: []
-    },
-    correoConfirmado: { 
-        type: Boolean, 
-        default: false 
-    },
+    }
 });
 
 const usuario = mongoose.model('usuario', UsuariosSchema);
