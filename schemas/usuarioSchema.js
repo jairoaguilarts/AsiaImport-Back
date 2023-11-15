@@ -6,10 +6,6 @@ const UsuariosSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    contrasenia: {
-        type: String,
-        required: true
-    },
     firebaseUID: {
         type: String,
         required: true
