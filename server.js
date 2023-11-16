@@ -1,4 +1,4 @@
-require('dotenv').config({ path: './dbConfig/credentials.env' });
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -15,24 +15,34 @@ admin.initializeApp({
 // Configuración de Firebase
 const { initializeApp } = require('firebase/app');
 const { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword } = require('firebase/auth');
-const { firebaseConfig, mongoUri } = require('./dbConfig/dbConfig');
-
-const appFirebase = initializeApp(firebaseConfig);
+//const { firebaseConfig, mongoUri } = require('./dbConfig/dbConfig');
 
 const app = express();
-const PORT = 3000;
+const PORT = 3000 || process.env.PORT;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({ origin: 'http://localhost:3001' }));
 
 const connectDB = async () => {
-  await mongoose.connect(mongoUri, {
+  await mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
   }).then(() => console.log("Conectado a MongoDB"))
     .catch(e => console.error('Error al conectar con MongoDB', e));
 };
+
+const firebaseConfig = {
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+};
+
+const appFirebase = initializeApp(firebaseConfig);
 
 // Schemas
 const Usuario = require("./schemas/usuarioSchema");
