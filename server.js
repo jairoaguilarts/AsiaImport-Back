@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const admin = require('firebase-admin'); // Importando Firebase Admin
+const cors = require('cors');
 
 // Configuración de Firebase Admin
 const serviceAccount = require('./dbConfig/importasiaauth-firebase-adminsdk-kwbl3-fa4407d620.json');
@@ -23,6 +24,7 @@ const PORT = 3000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors({origin: 'http://localhost:3001'}));
 
 mongoose.connect(mongoUri, {
   useNewUrlParser: true,
@@ -45,7 +47,7 @@ app.post('/signUp', async (req, res) => {
       return res.status(400).json({ error: 'Usuario ya registrado' });
     }
 
-    const nuevoUsuario = new Usuario({ correo, contrasenia, nombre, apellido, numeroIdentidad });
+    const nuevoUsuario = new Usuario({ nombre, apellido, numeroIdentidad });
 
     const auth = getAuth();
     try {
@@ -75,6 +77,9 @@ app.post('/logIn', async (req, res) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, correo, contrasenia);
       const user = userCredential.user;
+      if (!user.emailVerified) { 
+        return res.status(401).json({ error: 'Correo electrónico no verificado' }); 
+      }
       firebaseUID = user.uid;
     } catch (error) {
       const errorCode = error.code;
@@ -88,9 +93,6 @@ app.post('/logIn', async (req, res) => {
 
     if (!usuario) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
-    }
-    if (!usuario.emailVerified) { 
-      return res.status(401).json({ error: 'Correo electrónico no verificado' }); 
     }
 
     res.json({
