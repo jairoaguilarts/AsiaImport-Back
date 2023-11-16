@@ -24,13 +24,15 @@ const PORT = 3000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors({origin: 'http://localhost:3001'}));
+app.use(cors({ origin: 'http://localhost:3001' }));
 
-mongoose.connect(mongoUri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => console.log("Conectado a MongoDB"))
-  .catch(e => console.error('Error al conectar con MongoDB', e));
+const connectDB = async () => {
+  await mongoose.connect(mongoUri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  }).then(() => console.log("Conectado a MongoDB"))
+    .catch(e => console.error('Error al conectar con MongoDB', e));
+};
 
 // Schemas
 const Usuario = require("./schemas/usuarioSchema");
@@ -77,8 +79,8 @@ app.post('/logIn', async (req, res) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, correo, contrasenia);
       const user = userCredential.user;
-      if (!user.emailVerified) { 
-        return res.status(401).json({ error: 'Correo electrónico no verificado' }); 
+      if (!user.emailVerified) {
+        return res.status(401).json({ error: 'Correo electrónico no verificado' });
       }
       firebaseUID = user.uid;
     } catch (error) {
@@ -110,6 +112,8 @@ app.post('/logIn', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
+  })
 });
