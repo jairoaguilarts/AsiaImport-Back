@@ -59,7 +59,7 @@ app.post('/signUp', async (req, res) => {
       return res.status(400).json({ error: 'Usuario ya registrado' });
     }
 
-    const nuevoUsuario = new Usuario({ nombre, apellido, numeroIdentidad });
+    const nuevoUsuario = new Usuario({ nombre, apellido, correo, numeroIdentidad });
 
     const auth = getAuth();
     try {
