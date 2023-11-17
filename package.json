@@ -15,9 +15,16 @@
         "cors": "^2.8.5",
         "dotenv": "^8.2.0",
         "express": "^4.16.3",
+<<<<<<< HEAD
         "firebase": "^10.6.0",
         "firebase-admin": "^11.11.0",
         "mongoose": "^5.2.9"
+=======
+        "mongoose": "^5.2.9",
+        "dotenv": "^8.2.0",
+        "firebase-admin": "11.11.0",
+        "firebase": "10.6.0"
+>>>>>>> 6172402d37e04bb6ea98b909c166b0375f6823c5
     },
     "devDependencies": {
         "nodemon": "^2.0.19"

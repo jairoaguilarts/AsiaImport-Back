@@ -6,7 +6,11 @@ const admin = require("firebase-admin"); // Importando Firebase Admin
 const cors = require("cors");
 
 // Configuración de Firebase Admin
+<<<<<<< HEAD
 const serviceAccount = require("./dbConfig/importasiaauth-firebase-adminsdk-kwbl3-fa4407d620.json");
+=======
+const serviceAccount = require('./importasiaauth-firebase-adminsdk-kwbl3-fa4407d620.json');
+>>>>>>> 6172402d37e04bb6ea98b909c166b0375f6823c5
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -27,7 +31,11 @@ const PORT = 3000 || process.env.PORT;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+<<<<<<< HEAD
 app.use(cors({ origin: "http://localhost:3001" }));
+=======
+app.use(cors());
+>>>>>>> 6172402d37e04bb6ea98b909c166b0375f6823c5
 
 const connectDB = async () => {
   await mongoose
