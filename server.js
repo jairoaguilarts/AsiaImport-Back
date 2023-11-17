@@ -2,10 +2,9 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const admin = require("firebase-admin"); // Importando Firebase Admin
+const admin = require("firebase-admin");
 const cors = require("cors");
 
-// Configuración de Firebase Admin
 const serviceAccount = require('./importasiaauth-firebase-adminsdk-kwbl3-fa4407d620.json');
 
 admin.initializeApp({
@@ -27,7 +26,13 @@ const PORT = 3000 || process.env.PORT;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
+
+const corsOptions = {
+  origin: 'https://importasiahn.netlify.app',
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 
 const connectDB = async () => {
   await mongoose
