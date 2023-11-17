@@ -22,7 +22,7 @@ const PORT = 3000 || process.env.PORT;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors({ origin: 'https://importasiahn.netlify.app/' }));
+app.use(cors());
 
 const connectDB = async () => {
   await mongoose.connect(process.env.MONGO_URI, {
