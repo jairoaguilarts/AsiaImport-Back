@@ -6,7 +6,7 @@ const admin = require('firebase-admin'); // Importando Firebase Admin
 const cors = require('cors');
 
 // Configuración de Firebase Admin
-const serviceAccount = require('./dbConfig/importasiaauth-firebase-adminsdk-kwbl3-fa4407d620.json');
+const serviceAccount = require('./importasiaauth-firebase-adminsdk-kwbl3-fa4407d620.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
