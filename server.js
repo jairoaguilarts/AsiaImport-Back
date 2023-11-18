@@ -28,7 +28,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const corsOptions = {
-  origin: "https://importasiahn.netlify.app",
+  origin: ["https://importasiahn.netlify.app", "http://localhost:3001"],
   optionsSuccessStatus: 200,
 };
 
