@@ -103,7 +103,7 @@ app.post("/signUp", async (req, res) => {
   }
 });
 
-app.get("/Perfil", async (req, res) => {
+app.get("/perfil", async (req, res) => {
   const { firebaseUID } = req.query;
   try {
     const usuario = await Usuario.findOne({ firebaseUID });
