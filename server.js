@@ -103,6 +103,34 @@ app.post("/signUp", async (req, res) => {
   }
 });
 
+app.put("/perfil", async (req, res) => {
+  const { nombre, apellido, identidad } = req.body;
+  const { firebaseUID } = req.query; // Obtén el firebaseUID de los parámetros de la consulta
+
+  try {
+    // Utiliza findOneAndUpdate para actualizar los datos del usuario
+    const usuario = await Usuario.findOneAndUpdate(
+      { firebaseUID },
+      { nombre, apellido, numeroIdentidad: identidad },
+      { new: true } // Devuelve el documento actualizado
+    );
+
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    // Devuelve los datos actualizados del usuario
+    res.json({
+      nombre: usuario.nombre,
+      apellido: usuario.apellido,
+      numeroIdentidad: usuario.numeroIdentidad,
+    });
+  } catch (error) {
+    console.error("Error al actualizar información del usuario:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
 app.get("/perfil", async (req, res) => {
   const { firebaseUID } = req.query;
   try {
