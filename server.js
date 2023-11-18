@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
 const cors = require("cors");
 
-const serviceAccount = require('./importasiaauth-firebase-adminsdk-kwbl3-fa4407d620.json');
+const serviceAccount = require("./importasiaauth-firebase-adminsdk-kwbl3-fa4407d620.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -28,8 +28,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const corsOptions = {
-  origin: 'https://importasiahn.netlify.app',
-  optionsSuccessStatus: 200
+  origin: "https://importasiahn.netlify.app",
+  optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
@@ -100,6 +100,25 @@ app.post("/signUp", async (req, res) => {
     res.json(nuevoUsuario);
   } catch (error) {
     res.status(500).send({ error: error.message });
+  }
+});
+
+app.get("/Perfil", async (req, res) => {
+  const { firebaseUID } = req.query;
+  try {
+    const usuario = await Usuario.findOne({ firebaseUID });
+
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+    res.json({
+      nombre: usuario.nombre,
+      apellido: usuario.apellido,
+      numeroIdentidad: usuario.numeroIdentidad,
+    });
+  } catch (error) {
+    console.error("Error al obtener información del usuario:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
