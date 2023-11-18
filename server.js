@@ -71,11 +71,13 @@ app.post("/signUp", async (req, res) => {
       return res.status(400).json({ error: "Usuario ya registrado" });
     }
 
+    const userType = "-";
     const nuevoUsuario = new Usuario({
       nombre,
       apellido,
       correo,
       numeroIdentidad,
+      userType,
     });
 
     const auth = getAuth();
@@ -146,6 +148,7 @@ app.post("/logIn", async (req, res) => {
         apellido: usuario.apellido,
         correo: usuario.correo,
         numeroIdentidad: usuario.numeroIdentidad,
+        userType: usuario.userType,
         firebaseUID: usuario.firebaseUID,
       },
     });

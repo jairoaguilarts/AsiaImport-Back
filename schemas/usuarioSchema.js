@@ -22,6 +22,10 @@ const UsuariosSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    userType: {
+        type: String,
+        required: true
+    },
     carritoCompras: {
         type: [String],
         default: []
