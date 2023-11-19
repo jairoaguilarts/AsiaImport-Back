@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
 const cors = require("cors");
+const { sendPasswordResetEmail } = require("firebase/auth");
 
 const serviceAccount = require("./importasiaauth-firebase-adminsdk-kwbl3-fa4407d620.json");
 
@@ -203,6 +204,23 @@ app.post("/logIn", async (req, res) => {
     console.log("Error al obtener usuarios:", error);
     res.status(500).json({ error: "Error al obtener usuarios" });
   }
+});
+
+app.post("/recoverPassword", async (req, res) => {
+  const { correo } = req.body;
+  if (!correo) {
+    return res.status(400).json({ error: "Correo electrónico es requerido" });
+  }
+
+  const auth = getAuth();
+  sendPasswordResetEmail(auth, correo)
+    .then(() => {
+      res.status(200).json({ message: "Correo de recuperación enviado" });
+    })
+    .catch((error) => {
+      console.error("Error al enviar correo de recuperación:", error);
+      res.status(500).json({ error: error.code, message: error.message });
+    });
 });
 
 connectDB().then(() => {
