@@ -121,6 +121,7 @@ app.post("/agregarEmpleado", async (req, res) => {
       const userCredential = await createUserWithEmailAndPassword(auth, correo, contrasenia);
       const user = userCredential.user;
       nuevoUsuario.firebaseUID = user.uid;
+      await sendEmailVerification(user);
     } catch (error) {
       return res.status(500)
         .json({ error: "Error en Firebase", message: error.message });
