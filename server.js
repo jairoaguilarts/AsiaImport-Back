@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
 const cors = require("cors");
-const { sendPasswordResetEmail } = require("firebase/auth");
 
 const serviceAccount = require("./importasiaauth-firebase-adminsdk-kwbl3-fa4407d620.json");
 
@@ -19,6 +18,8 @@ const {
   createUserWithEmailAndPassword,
   sendEmailVerification,
   signInWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail
 } = require("firebase/auth");
 //const { firebaseConfig, mongoUri } = require('./dbConfig/dbConfig');
 
@@ -314,6 +315,21 @@ app.post("/recoverPassword", async (req, res) => {
       console.error("Error al enviar correo de recuperación:", error);
       res.status(500)
         .json({ error: error.code, message: error.message });
+    });
+});
+
+app.get('/logOut', (req, res) => {
+  const auth = getAuth();
+  signOut(auth)
+    .then(() => {
+      res.status(200).send({
+        "msg": "Cierre de sesión exitoso"
+      })
+    })
+    .catch((error) => {
+      res.status(500).send({
+        "msg": "Error al cerrar sesión"
+      })
     });
 });
 
