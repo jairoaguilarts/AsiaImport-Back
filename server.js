@@ -333,6 +333,16 @@ app.get('/logOut', (req, res) => {
     });
 });
 
+app.get('/empleados', (req, res) => {
+  Usuario.find({ userType: '+' })
+    .then(empleados => {
+      res.json(empleados);
+    })
+    .catch(error => {
+      res.status(500).json({ error: 'Error al obtener empleados' });
+    });
+});
+
 /* </Endpoints> */
 
 connectDB().then(() => {
