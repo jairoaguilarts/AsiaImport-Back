@@ -120,7 +120,9 @@ app.delete("/eliminarProducto", async (req, res) => {
   if (userDeletingType != "*" || userDeletingType != "-") {
     return res
       .status(402)
-      .json({ error: "Solo un administrador o un empleado puede eliminar productos" });
+      .json({
+        error: "Solo un administrador o un empleado puede eliminar productos",
+      });
   }
 
   try {
@@ -229,7 +231,83 @@ app.post("/agregarEmpleado", async (req, res) => {
     res.status(500).send({ error: error.message });
   }
 });
-app.put;
+app.put("/modificarProducto", async (req, res) => {
+  let actualizaciones = {};
+  const {
+    ID,
+    DepartamentoID,
+    CategoriaID,
+    Descripcion,
+    Precio,
+    PrecioA,
+    PrecioB,
+    ImagenID,
+    Cantidad,
+    userCreatingType,
+  } = req.body;
+  const { Modelo } = req.query;
+
+  if (userCreatingType != "*" || userCreatingType != "+") {
+    return res.status(402).json({
+      error: "Solo el administrador y los Empleados pueden agregar productos",
+    });
+  }
+  try {
+    if (ID !== undefined) {
+      actualizaciones.ID = ID;
+    }
+    if (DepartamentoID !== undefined) {
+      actualizaciones.DepartamentoID = DepartamentoID;
+    }
+    if (CategoriaID !== undefined) {
+      actualizaciones.CategoriaID = CategoriaID;
+    }
+    if (Descripcion !== undefined) {
+      actualizaciones.Descripcion = Descripcion;
+    }
+    if (Precio !== undefined) {
+      actualizaciones.Precio = Precio;
+    }
+    if (PrecioA !== undefined) {
+      actualizaciones.PrecioA = PrecioA;
+    }
+    if (PrecioB !== undefined) {
+      actualizaciones.PrecioB = PrecioB;
+    }
+    if (ImagenID !== undefined) {
+      actualizaciones.ImagenID = ImagenID;
+    }
+    if (Cantidad !== undefined) {
+      actualizaciones.Cantidad = Cantidad;
+    }
+    if (userCreatingType !== undefined) {
+      actualizaciones.userCreatingType = userCreatingType;
+    }
+    const producto = await Producto.findOneAndUpdate(
+      { Modelo },
+      actualizaciones,
+      { new: true }
+    );
+
+    if (!producto) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
+
+    res.json({
+      ID: producto.ID,
+      DepartamentoID: producto.DepartamentoID,
+      CategoriaID: producto.CategoriaID,
+      Descripcion: producto.Descripcion,
+      Precio: producto.Precio,
+      PrecioA: producto.PrecioA,
+      PrecioB: producto.PrecioB,
+      ImagenID: producto.ImagenID,
+      Cantidad: producto.Cantidad,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
 app.put("/modificarEmpleado", async (req, res) => {
   const { nombre, apellido, numeroIdentidad, userModifyingType } = req.body;
   const { firebaseUID } = req.query;
