@@ -147,16 +147,6 @@ app.put("/modificarEmpleado", async (req, res) => {
   }
 
   try {
-    const usuario = await Usuario.findOneAndUpdate(
-      { firebaseUID },
-      { nombre, apellido, numeroIdentidad },
-      { new: true } // Devuelve el documento actualizado
-    );
-
-    if (!usuario) {
-      return res.status(404)
-        .json({ error: "Usuario no encontrado" });
-    }
 
     res
       .json({
