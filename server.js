@@ -147,6 +147,26 @@ app.put("/modificarEmpleado", async (req, res) => {
   }
 
   try {
+    let actualizaciones = {};
+    if (nombre !== undefined) {
+      actualizaciones.nombre = nombre;
+    }
+    if (apellido !== undefined) {
+      actualizaciones.apellido = apellido;
+    }
+    if (numeroIdentidad !== undefined) {
+      actualizaciones.numeroIdentidad = numeroIdentidad;
+    }
+    const usuario = await Usuario.findOneAndUpdate(
+      { firebaseUID },
+      actualizaciones,
+      { new: true }
+    );
+
+    if (!usuario) {
+      return res.status(404)
+        .json({ error: "Usuario no encontrado" });
+    }
 
     res
       .json({
