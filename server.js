@@ -19,7 +19,7 @@ const {
   sendEmailVerification,
   signInWithEmailAndPassword,
   signOut,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
 } = require("firebase/auth");
 //const { firebaseConfig, mongoUri } = require('./dbConfig/dbConfig');
 
@@ -60,80 +60,143 @@ const appFirebase = initializeApp(firebaseConfig);
 
 // Schemas
 const Usuario = require("./schemas/usuarioSchema");
+const Producto = require("./schemas/productosSchema");
 
 app.get("/", (req, res) => {
   res.send("Hola Mundo!");
 });
 
 /* <Endpoints> */
+app.post("/agregarProducto", async (req, res) => {
+  const {
+    ID,
+    DepartamentoID,
+    CategoriaID,
+    Descripcion,
+    Modelo,
+    Precio,
+    PrecioA,
+    PrecioB,
+    ImagenID,
+    Cantidad,
+  } = req.body;
+  try {
+    const productoExistente = await Producto.findOne({ Modelo });
+    if (productoExistente) {
+      return res.status(400).json({ error: "Producto ya registrado" });
+    }
+
+    const nuevoProducto = new Producto({
+      ID,
+      DepartamentoID,
+      CategoriaID,
+      Descripcion,
+      Modelo,
+      Precio,
+      PrecioA,
+      PrecioB,
+      ImagenID,
+      Cantidad,
+    });
+
+    await nuevoProducto.save();
+    res.json(nuevoProducto);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
 
 app.post("/signUp", async (req, res) => {
   const { correo, contrasenia, nombre, apellido, numeroIdentidad } = req.body;
   try {
     const usuarioExistente = await Usuario.findOne({ correo });
     if (usuarioExistente) {
-      return res.status(400)
-        .json({ error: "Usuario ya registrado" });
+      return res.status(400).json({ error: "Usuario ya registrado" });
     }
 
     const userType = "-";
-    const nuevoUsuario = new Usuario({ nombre, apellido, correo, numeroIdentidad, userType });
+    const nuevoUsuario = new Usuario({
+      nombre,
+      apellido,
+      correo,
+      numeroIdentidad,
+      userType,
+    });
 
     const auth = getAuth();
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, correo, contrasenia);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        correo,
+        contrasenia
+      );
       const user = userCredential.user;
       nuevoUsuario.firebaseUID = user.uid;
       await sendEmailVerification(user);
     } catch (error) {
-      return res.status(500)
+      return res
+        .status(500)
         .json({ error: "Error en Firebase", message: error.message });
     }
 
     await nuevoUsuario.save();
-    res
-      .json(nuevoUsuario);
+    res.json(nuevoUsuario);
   } catch (error) {
-    res.status(500)
-      .send({ error: error.message });
+    res.status(500).send({ error: error.message });
   }
 });
 
 app.post("/agregarEmpleado", async (req, res) => {
-  const { correo, contrasenia, nombre, apellido, numeroIdentidad, userCreatingType } = req.body;
+  const {
+    correo,
+    contrasenia,
+    nombre,
+    apellido,
+    numeroIdentidad,
+    userCreatingType,
+  } = req.body;
 
   if (userCreatingType != "*") {
-    return res.status(402)
+    return res
+      .status(402)
       .json({ error: "Solo el administrador puede registrar empleados" });
   }
 
   try {
     const usuarioExistente = await Usuario.findOne({ correo });
     if (usuarioExistente) {
-      return res.status(400)
-        .json({ error: "Empleado ya registrado" });
+      return res.status(400).json({ error: "Empleado ya registrado" });
     }
 
     const userType = "+";
-    const nuevoUsuario = new Usuario({ nombre, apellido, correo, numeroIdentidad, userType });
+    const nuevoUsuario = new Usuario({
+      nombre,
+      apellido,
+      correo,
+      numeroIdentidad,
+      userType,
+    });
 
     const auth = getAuth();
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, correo, contrasenia);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        correo,
+        contrasenia
+      );
       const user = userCredential.user;
       nuevoUsuario.firebaseUID = user.uid;
       await sendEmailVerification(user);
     } catch (error) {
-      return res.status(500)
+      return res
+        .status(500)
         .json({ error: "Error en Firebase", message: error.message });
     }
 
     await nuevoUsuario.save();
-    res
-      .json(nuevoUsuario);
+    res.json(nuevoUsuario);
   } catch (error) {
-    res.status(500)
-      .send({ error: error.message });
+    res.status(500).send({ error: error.message });
   }
 });
 
@@ -142,7 +205,8 @@ app.put("/modificarEmpleado", async (req, res) => {
   const { firebaseUID } = req.query;
 
   if (userModifyingType != "*") {
-    return res.status(402)
+    return res
+      .status(402)
       .json({ error: "Solo el administrador puede modificar empleados" });
   }
 
@@ -164,19 +228,16 @@ app.put("/modificarEmpleado", async (req, res) => {
     );
 
     if (!usuario) {
-      return res.status(404)
-        .json({ error: "Usuario no encontrado" });
+      return res.status(404).json({ error: "Usuario no encontrado" });
     }
 
-    res
-      .json({
-        nombre: usuario.nombre,
-        apellido: usuario.apellido,
-        numeroIdentidad: usuario.numeroIdentidad,
-      });
+    res.json({
+      nombre: usuario.nombre,
+      apellido: usuario.apellido,
+      numeroIdentidad: usuario.numeroIdentidad,
+    });
   } catch (error) {
-    res.status(500)
-      .json({ error: "Error interno del servidor" });
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
@@ -185,7 +246,8 @@ app.delete("/eliminarEmpleado", async (req, res) => {
   const { firebaseUID } = req.query;
 
   if (userDeletingType != "*") {
-    return res.status(402)
+    return res
+      .status(402)
       .json({ error: "Solo el administrador puede eliminar empleados" });
   }
 
@@ -195,15 +257,12 @@ app.delete("/eliminarEmpleado", async (req, res) => {
     const result = await Usuario.deleteOne({ firebaseUID });
 
     if (result.deletedCount === 0) {
-      res.status(404)
-        .json({ message: "Error al eliminar empleado" });
+      res.status(404).json({ message: "Error al eliminar empleado" });
     } else {
-      res
-        .json({ message: "Empleado eliminado con éxito" });
+      res.json({ message: "Empleado eliminado con éxito" });
     }
   } catch (error) {
-    res.status(500)
-      .json({ error: "Ocurrió un error al eliminar empleado" });
+    res.status(500).json({ error: "Ocurrió un error al eliminar empleado" });
   }
 });
 
@@ -225,7 +284,10 @@ app.put("/hacerAdmin", async (req, res) => {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    res.json({ message: "Usuario actualizado a administrador", usuario: result });
+    res.json({
+      message: "Usuario actualizado a administrador",
+      usuario: result,
+    });
   } catch (error) {
     res.status(500).json({ error: "Error al actualizar el usuario" });
   }
@@ -243,19 +305,16 @@ app.put("/perfil", async (req, res) => {
     );
 
     if (!usuario) {
-      return res.status(404)
-        .json({ error: "Usuario no encontrado" });
+      return res.status(404).json({ error: "Usuario no encontrado" });
     }
 
-    res
-      .json({
-        nombre: usuario.nombre,
-        apellido: usuario.apellido,
-        numeroIdentidad: usuario.numeroIdentidad,
-      });
+    res.json({
+      nombre: usuario.nombre,
+      apellido: usuario.apellido,
+      numeroIdentidad: usuario.numeroIdentidad,
+    });
   } catch (error) {
-    res.status(500)
-      .json({ error: "Error interno del servidor" });
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
@@ -265,8 +324,7 @@ app.get("/perfil", async (req, res) => {
     const usuario = await Usuario.findOne({ firebaseUID });
 
     if (!usuario) {
-      return res.status(404)
-        .json({ error: "Usuario no encontrado" });
+      return res.status(404).json({ error: "Usuario no encontrado" });
     }
     res.json({
       nombre: usuario.nombre,
@@ -275,8 +333,7 @@ app.get("/perfil", async (req, res) => {
     });
   } catch (error) {
     console.error("Error al obtener información del usuario:", error);
-    res.status(500)
-      .json({ error: "Error interno del servidor" });
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
@@ -284,96 +341,95 @@ app.post("/logIn", async (req, res) => {
   const { correo, contrasenia } = req.body;
   try {
     if (!correo.trim() || !contrasenia.trim()) {
-      return res.status(400)
+      return res
+        .status(400)
         .json({ error: "Error falta el Correo o Contraseña " });
     }
     const auth = getAuth();
     let firebaseUID = "";
     let nombre = "";
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, correo, contrasenia);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        correo,
+        contrasenia
+      );
       const user = userCredential.user;
       if (!user.emailVerified) {
-        return res.status(401)
+        return res
+          .status(401)
           .json({ error: "Correo electrónico no verificado" });
       }
       firebaseUID = user.uid;
     } catch (error) {
       const errorCode = error.code;
       const errorMessage = error.message;
-      return res.status(500)
-        .send({
-          msg: "Credenciales incorrectas",
-        });
+      return res.status(500).send({
+        msg: "Credenciales incorrectas",
+      });
     }
 
     const usuario = await Usuario.findOne({ firebaseUID });
 
     if (!usuario) {
-      return res.status(404)
-        .json({ error: "Usuario no encontrado" });
+      return res.status(404).json({ error: "Usuario no encontrado" });
     }
 
-    res
-      .json({
-        success: true,
-        usuario: {
-          nombre: usuario.nombre,
-          apellido: usuario.apellido,
-          correo: usuario.correo,
-          numeroIdentidad: usuario.numeroIdentidad,
-          userType: usuario.userType,
-          firebaseUID: usuario.firebaseUID,
-        },
-      });
+    res.json({
+      success: true,
+      usuario: {
+        nombre: usuario.nombre,
+        apellido: usuario.apellido,
+        correo: usuario.correo,
+        numeroIdentidad: usuario.numeroIdentidad,
+        userType: usuario.userType,
+        firebaseUID: usuario.firebaseUID,
+      },
+    });
   } catch (error) {
-    res.status(500)
-      .json({ error: "Error al obtener usuarios" });
+    res.status(500).json({ error: "Error al obtener usuarios" });
   }
 });
 
 app.post("/recoverPassword", async (req, res) => {
   const { correo } = req.body;
   if (!correo) {
-    return res.status(400)
-      .json({ error: "Correo electrónico es requerido" });
+    return res.status(400).json({ error: "Correo electrónico es requerido" });
   }
 
   const auth = getAuth();
   sendPasswordResetEmail(auth, correo)
     .then(() => {
-      res.status(200)
-        .json({ message: "Correo de recuperación enviado" });
+      res.status(200).json({ message: "Correo de recuperación enviado" });
     })
     .catch((error) => {
       console.error("Error al enviar correo de recuperación:", error);
-      res.status(500)
-        .json({ error: error.code, message: error.message });
+      res.status(500).json({ error: error.code, message: error.message });
     });
 });
 
-app.get('/logOut', (req, res) => {
+app.get("/logOut", (req, res) => {
   const auth = getAuth();
   signOut(auth)
     .then(() => {
       res.status(200).send({
-        "msg": "Cierre de sesión exitoso"
-      })
+        msg: "Cierre de sesión exitoso",
+      });
     })
     .catch((error) => {
       res.status(500).send({
-        "msg": "Error al cerrar sesión"
-      })
+        msg: "Error al cerrar sesión",
+      });
     });
 });
 
-app.get('/empleados', (req, res) => {
-  Usuario.find({ userType: '+' })
-    .then(empleados => {
+app.get("/empleados", (req, res) => {
+  Usuario.find({ userType: "+" })
+    .then((empleados) => {
       res.json(empleados);
     })
-    .catch(error => {
-      res.status(500).json({ error: 'Error al obtener empleados' });
+    .catch((error) => {
+      res.status(500).json({ error: "Error al obtener empleados" });
     });
 });
 
