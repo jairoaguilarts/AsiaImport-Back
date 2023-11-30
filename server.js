@@ -117,7 +117,7 @@ app.delete("/eliminarProducto", async (req, res) => {
   const { userDeletingType } = req.body;
   const { modelo } = req.query;
 
-  if (userDeletingType != "*" || userDeletingType != "-") {
+  if (userDeletingType != "*" || userDeletingType != "+") {
     return res
       .status(402)
       .json({
