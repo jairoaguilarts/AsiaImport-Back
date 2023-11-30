@@ -197,6 +197,30 @@ app.delete("/eliminarEmpleado", async (req, res) => {
   }
 });
 
+app.put("/hacerAdmin", async (req, res) => {
+  const { firebaseUID } = req.query;
+
+  if (!firebaseUID) {
+    return res.status(400).json({ error: "Se requiere el Firebase UID" });
+  }
+
+  try {
+    const result = await Usuario.findOneAndUpdate(
+      { firebaseUID: firebaseUID },
+      { userType: "*" },
+      { new: true }
+    );
+
+    if (!result) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    res.json({ message: "Usuario actualizado a administrador", usuario: result });
+  } catch (error) {
+    res.status(500).json({ error: "Error al actualizar el usuario" });
+  }
+});
+
 app.put("/perfil", async (req, res) => {
   const { nombre, apellido, identidad } = req.body;
   const { firebaseUID } = req.query;
