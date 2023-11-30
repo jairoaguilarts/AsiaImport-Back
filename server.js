@@ -106,6 +106,29 @@ app.post("/agregarProducto", async (req, res) => {
   }
 });
 
+app.delete("/eliminarProducto", async (req, res) => {
+  const { userDeletingType } = req.body;
+  const { modelo } = req.query;
+
+  if (userDeletingType != "*" || userDeletingType != "-") {
+    return res
+      .status(402)
+      .json({ error: "Solo un administrador o un empleado puede eliminar productos" });
+  }
+
+  try {
+    const result = await Producto.deleteOne({ modelo });
+
+    if (result.deletedCount === 0) {
+      res.status(404).json({ message: "Error al eliminar producto" });
+    } else {
+      res.json({ message: "Producto eliminado exitosamente" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Ocurrió un error al eliminar producto" });
+  }
+});
+
 app.post("/signUp", async (req, res) => {
   const { correo, contrasenia, nombre, apellido, numeroIdentidad } = req.body;
   try {
