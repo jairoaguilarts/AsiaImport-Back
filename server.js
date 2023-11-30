@@ -79,7 +79,14 @@ app.post("/agregarProducto", async (req, res) => {
     PrecioB,
     ImagenID,
     Cantidad,
+    userCreatingType,
   } = req.body;
+
+  if (userCreatingType != "*" || userCreatingType != "+") {
+    return res.status(402).json({
+      error: "Solo el administrador y los Empleados pueden agregar productos",
+    });
+  }
   try {
     const productoExistente = await Producto.findOne({ Modelo });
     if (productoExistente) {
@@ -199,7 +206,7 @@ app.post("/agregarEmpleado", async (req, res) => {
     res.status(500).send({ error: error.message });
   }
 });
-
+app.put;
 app.put("/modificarEmpleado", async (req, res) => {
   const { nombre, apellido, numeroIdentidad, userModifyingType } = req.body;
   const { firebaseUID } = req.query;
