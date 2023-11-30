@@ -231,6 +231,7 @@ app.post("/agregarEmpleado", async (req, res) => {
     res.status(500).send({ error: error.message });
   }
 });
+
 app.put("/modificarProducto", async (req, res) => {
   let actualizaciones = {};
   const {
@@ -308,6 +309,7 @@ app.put("/modificarProducto", async (req, res) => {
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
+
 app.put("/modificarEmpleado", async (req, res) => {
   const { nombre, apellido, numeroIdentidad, userModifyingType } = req.body;
   const { firebaseUID } = req.query;
