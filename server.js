@@ -67,22 +67,29 @@ app.get("/", (req, res) => {
 });
 
 /* <Endpoints> */
+app.get("/productos", (req, res) => {
+  Producto.find({ modelo })
+    .then((productos) => {
+      res.json(productos);
+    })
+    .catch((error) => {
+      res.status(500).json({ error: "Error al obtener productos" });
+    });
+});
 app.post("/agregarProducto", async (req, res) => {
   const {
-    ID,
-    DepartamentoID,
-    CategoriaID,
+    Categoria,
+    Nombre,
     Descripcion,
+    Caracteristicas,
     Modelo,
     Precio,
-    PrecioA,
-    PrecioB,
     ImagenID,
     Cantidad,
     userCreatingType,
   } = req.body;
 
-  if (userCreatingType != "*" || userCreatingType != "+") {
+  if (userCreatingType !== "*" && userCreatingType !== "+") {
     return res.status(402).json({
       error: "Solo el administrador y los Empleados pueden agregar productos",
     });
@@ -94,14 +101,12 @@ app.post("/agregarProducto", async (req, res) => {
     }
 
     const nuevoProducto = new Producto({
-      ID,
-      DepartamentoID,
-      CategoriaID,
+      Categoria,
+      Nombre,
       Descripcion,
+      Caracteristicas,
       Modelo,
       Precio,
-      PrecioA,
-      PrecioB,
       ImagenID,
       Cantidad,
     });
@@ -118,11 +123,9 @@ app.delete("/eliminarProducto", async (req, res) => {
   const { modelo } = req.query;
 
   if (userDeletingType != "*" || userDeletingType != "+") {
-    return res
-      .status(402)
-      .json({
-        error: "Solo un administrador o un empleado puede eliminar productos",
-      });
+    return res.status(402).json({
+      error: "Solo un administrador o un empleado puede eliminar productos",
+    });
   }
 
   try {

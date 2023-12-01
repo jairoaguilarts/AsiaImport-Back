@@ -1,21 +1,21 @@
 const mongoose = require("mongoose");
 
 const productosSchema = new mongoose.Schema({
-  ID: {
+  Nombre: {
     type: String,
     required: true,
   },
-  DepartamentoID: {
-    type: String,
-    required: true,
-  },
-  CategoriaID: {
+  Categoria: {
     type: String,
     required: true,
   },
   Descripcion: {
     type: String,
-    required: true,
+    required: false,
+  },
+  Caracteristicas: {
+    type: String,
+    required: false,
   },
   Modelo: {
     type: String,
@@ -26,17 +26,11 @@ const productosSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  PrecioA: {
-    type: String,
-    required: true,
-  },
-  PrecioB: {
-    type: String,
-    required: true,
-  },
+
   ImagenID: {
-    type: String,
-    required: true,
+    type: [String],
+    required: false,
+    default: [],
   },
   Cantidad: {
     type: String,
