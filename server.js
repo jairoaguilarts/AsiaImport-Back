@@ -67,15 +67,27 @@ app.get("/", (req, res) => {
 });
 
 /* <Endpoints> */
-app.get("/productos", (req, res) => {
-  Producto.find({ modelo })
-    .then((productos) => {
-      res.json(productos);
+app.get('/productos', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10; 
+    const productos = await Producto.find({}).limit(limit);
+    res.json(productos);
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error al obtener los productos" });
+  }
+});
+
+app.get("/buscarProducto", (req, res) => {
+  const { nombre } = req.body;
+  Producto.find({ nombre })
+    .then((producto) => {
+      res.json(producto);
     })
     .catch((error) => {
       res.status(500).json({ error: "Error al obtener productos" });
     });
 });
+
 app.post("/agregarProducto", async (req, res) => {
   const {
     Categoria,
@@ -236,88 +248,49 @@ app.post("/agregarEmpleado", async (req, res) => {
 });
 
 app.put("/modificarProducto", async (req, res) => {
-  let actualizaciones = {};
-  const {
-    ID,
-    DepartamentoID,
-    CategoriaID,
-    Descripcion,
-    Precio,
-    PrecioA,
-    PrecioB,
-    ImagenID,
-    Cantidad,
-    userCreatingType,
-  } = req.body;
+  const { Descripcion, Caracteristicas, ImagenID, Precio, Cantidad } = req.body;
   const { Modelo } = req.query;
 
-  if (userCreatingType != "*" || userCreatingType != "+") {
-    return res.status(402).json({
-      error: "Solo el administrador y los Empleados pueden agregar productos",
-    });
-  }
   try {
-    if (ID !== undefined) {
-      actualizaciones.ID = ID;
-    }
-    if (DepartamentoID !== undefined) {
-      actualizaciones.DepartamentoID = DepartamentoID;
-    }
-    if (CategoriaID !== undefined) {
-      actualizaciones.CategoriaID = CategoriaID;
-    }
+    let actualizaciones = {};
     if (Descripcion !== undefined) {
       actualizaciones.Descripcion = Descripcion;
     }
-    if (Precio !== undefined) {
-      actualizaciones.Precio = Precio;
-    }
-    if (PrecioA !== undefined) {
-      actualizaciones.PrecioA = PrecioA;
-    }
-    if (PrecioB !== undefined) {
-      actualizaciones.PrecioB = PrecioB;
+    if (Caracteristicas !== undefined) {
+      actualizaciones.Caracteristicas = Caracteristicas;
     }
     if (ImagenID !== undefined) {
       actualizaciones.ImagenID = ImagenID;
     }
+    if (Precio !== undefined) {
+      actualizaciones.Precio = Precio;
+    }
     if (Cantidad !== undefined) {
       actualizaciones.Cantidad = Cantidad;
     }
-    if (userCreatingType !== undefined) {
-      actualizaciones.userCreatingType = userCreatingType;
-    }
-    const producto = await Producto.findOneAndUpdate(
+
+    const productoActualizado = await Producto.findOneAndUpdate(
       { Modelo },
       actualizaciones,
       { new: true }
     );
 
-    if (!producto) {
+    if (!productoActualizado) {
       return res.status(404).json({ error: "Producto no encontrado" });
     }
 
-    res.json({
-      ID: producto.ID,
-      DepartamentoID: producto.DepartamentoID,
-      CategoriaID: producto.CategoriaID,
-      Descripcion: producto.Descripcion,
-      Precio: producto.Precio,
-      PrecioA: producto.PrecioA,
-      PrecioB: producto.PrecioB,
-      ImagenID: producto.ImagenID,
-      Cantidad: producto.Cantidad,
-    });
+    res.json(productoActualizado);
   } catch (error) {
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
+
 app.put("/modificarEmpleado", async (req, res) => {
   const { nombre, apellido, numeroIdentidad, userModifyingType } = req.body;
   const { firebaseUID } = req.query;
 
-  if (userModifyingType != "*") {
+  if (userModifyingType != "*" || userModifyingType != "+") {
     return res
       .status(402)
       .json({ error: "Solo el administrador puede modificar empleados" });
