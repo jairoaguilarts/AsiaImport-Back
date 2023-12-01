@@ -134,7 +134,7 @@ app.delete("/eliminarProducto", async (req, res) => {
   const { userDeletingType } = req.body;
   const { Modelo } = req.query;
 
-  if (userDeletingType != "*" || userDeletingType != "+") {
+  if (userDeletingType !== "*" && userDeletingType !== "+") {
     return res.status(402).json({
       error: "Solo un administrador o un empleado puede eliminar productos",
     });
