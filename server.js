@@ -132,7 +132,7 @@ app.post("/agregarProducto", async (req, res) => {
 
 app.delete("/eliminarProducto", async (req, res) => {
   const { userDeletingType } = req.body;
-  const { modelo } = req.query;
+  const { Modelo } = req.query;
 
   if (userDeletingType != "*" || userDeletingType != "+") {
     return res.status(402).json({
@@ -141,7 +141,7 @@ app.delete("/eliminarProducto", async (req, res) => {
   }
 
   try {
-    const result = await Producto.deleteOne({ modelo });
+    const result = await Producto.deleteOne({ Modelo });
 
     if (result.deletedCount === 0) {
       res.status(404).json({ message: "Error al eliminar producto" });
