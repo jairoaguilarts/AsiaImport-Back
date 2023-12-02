@@ -86,7 +86,7 @@ app.get("/buscarProducto", async (req, res) => {
         .send({ message: "No se ingresó ningún parámetro" });
     }
     const productos = await Producto.find({
-      Categoria: new RegExp(Nombre, "i"),
+      $or: [{ Categoria: new RegExp(Nombre, "i") }],
     });
     if (!productos) {
       return res.status(404).send({ message: "Producto no encontrado" });
