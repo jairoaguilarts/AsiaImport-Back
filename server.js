@@ -192,13 +192,28 @@ app.delete("/eliminarProducto", async (req, res) => {
   }
 
   try {
-    const result = await Producto.deleteOne({ Modelo });
-
-    if (result.deletedCount === 0) {
-      res.status(404).json({ message: "Error al eliminar producto" });
-    } else {
-      res.json({ message: "Producto eliminado exitosamente" });
+    const producto = await Producto.findOne({ Modelo });
+    if (!producto) {
+      return res.status(404).json({ message: "Producto no encontrado" });
     }
+
+    const imagenPath = producto.ImagenID;
+    const bucket = admin.storage().bucket();
+
+    if (Array.isArray(imagenPath)) {
+      for (const path of imagenPath) {
+        await bucket.file(path).delete();
+      }
+    } else {
+      await bucket.file(imagenPath).delete();
+    }
+
+    const result = await Producto.deleteOne({ Modelo });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "Error al eliminar producto" });
+    }
+
+    res.json({ message: "Producto e imagen(es) eliminados exitosamente" });
   } catch (error) {
     res.status(500).json({ error: "Ocurrió un error al eliminar producto" });
   }
