@@ -133,7 +133,7 @@ app.post("/agregarProducto", async (req, res) => {
     }
 
     if (!req.files || Object.keys(req.files).length === 0) {
-      return res.status(400).send('No se encontraron archivos para subir.');
+      return res.status(401).send('No se encontraron archivos para subir.');
     }
 
     let uploadFile = req.files.uploadedFile;
