@@ -117,7 +117,6 @@ app.post("/agregarProducto", async (req, res) => {
     Caracteristicas,
     Modelo,
     Precio,
-    ImagenID,
     Cantidad,
     userCreatingType,
   } = req.body;
@@ -133,19 +132,50 @@ app.post("/agregarProducto", async (req, res) => {
       return res.status(400).json({ error: "Producto ya registrado" });
     }
 
-    const nuevoProducto = new Producto({
-      Categoria,
-      Nombre,
-      Descripcion,
-      Caracteristicas,
-      Modelo,
-      Precio,
-      ImagenID,
-      Cantidad,
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).send('No se encontraron archivos para subir.');
+    }
+
+    let uploadFile = req.files.uploadedFile;
+    let filePath = `${Categoria}/${uploadFile.name}`;
+
+    const bucket = admin.storage().bucket();
+    const file = bucket.file(filePath);
+    const stream = file.createWriteStream({
+      metadata: {
+        contentType: uploadFile.mimetype
+      }
     });
 
-    await nuevoProducto.save();
-    res.json(nuevoProducto);
+    stream.on('error', (e) => {
+      console.error(e);
+      res.status(500).send(e);
+    });
+
+    stream.on('finish', async () => {
+      try {
+        await file.makePublic();
+        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
+        const nuevoProducto = new Producto({
+          Categoria,
+          Nombre,
+          Descripcion,
+          Caracteristicas,
+          Modelo,
+          Precio,
+          ImagenID: publicUrl,
+          Cantidad,
+        });
+
+        await nuevoProducto.save();
+        return res.json({ producto: nuevoProducto, message: "Producto e imagen subidos exitosamente." });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).send({ error: error.message });
+      }
+    });
+
+    stream.end(uploadFile.data);
   } catch (error) {
     res.status(500).send({ error: error.message });
   }
@@ -537,37 +567,6 @@ app.get("/empleados", (req, res) => {
     .catch((error) => {
       res.status(500).json({ error: "Error al obtener empleados" });
     });
-});
-
-app.post('/subirImagen', (req, res) => {
-  if (!req.files || Object.keys(req.files).length === 0) {
-    return res.status(400).send('No se encontraron archivos para subir.');
-  }
-
-  let uploadFile = req.files.uploadedFile;
-  let filePath = `${req.body.categoria}/${uploadFile.name}`;
-
-  const bucket = admin.storage().bucket();
-  const file = bucket.file(filePath);
-  const stream = file.createWriteStream({
-    metadata: {
-      contentType: uploadFile.mimetype
-    }
-  });
-
-  stream.on('error', (e) => {
-    console.error(e);
-    res.status(500).send(e);
-  });
-
-  stream.on('finish', () => {
-    file.makePublic().then(() => {
-      const publicUrl = `https://storage.googleapis.com/${bucket.name}${filePath}`;
-      res.status(200).send("Imagen subida exitosamente.");
-    });
-  });
-
-  stream.end(uploadFile.data);
 });
 
 /* </Endpoints> */
