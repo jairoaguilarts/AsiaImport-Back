@@ -576,7 +576,6 @@ exports.uploadImage = functions.https.onRequest((req, res) => {
   });
 });
 
-
 connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
