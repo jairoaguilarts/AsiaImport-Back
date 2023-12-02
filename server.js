@@ -1,8 +1,9 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-const { getStorage } = require ('firebase/storage')
+const { getStorage } = require('firebase/storage')
 const functions = require('firebase-functions');
+const fileUpload = require('express-fileupload');
 const path = require('path');
 const os = require('os');
 const bodyParser = require("body-parser");
@@ -13,6 +14,7 @@ const serviceAccount = require("./importasiaauth-firebase-adminsdk-kwbl3-fa4407d
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
+  storageBucket: 'importasiaauth.appspot.com',
 });
 
 // Configuración de Firebase
@@ -25,13 +27,13 @@ const {
   signOut,
   sendPasswordResetEmail,
 } = require("firebase/auth");
-//const { firebaseConfig, mongoUri } = require('./dbConfig/dbConfig');
 
 const app = express();
 const PORT = 3000 || process.env.PORT;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(fileUpload());
 
 const corsOptions = {
   origin: ["https://importasiahn.netlify.app", "http://localhost:3001"],
@@ -537,44 +539,38 @@ app.get("/empleados", (req, res) => {
     });
 });
 
-/* </Endpoints> */
+app.post('/subirImagen', (req, res) => {
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return res.status(400).send('No se encontraron archivos para subir.');
+  }
 
-exports.uploadImage = functions.https.onRequest((req, res) => {
-  cors(req, res, () => {
+  let uploadFile = req.files.uploadedFile;
+  let filePath = `${req.body.categoria}/${uploadFile.name}`;
 
-    const bucketName = "gs://importasiaauth.appspot.com";
-    const bucket = storage.bucket(bucketName);
-
-    const tmpdir = os.tmpdir();
-    const filePath = path.join(tmpdir, 'image.jpg');
-
-    const busboy = new Busboy({ headers: req.headers });
-
-    busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-      const writeStream = fs.createWriteStream(filePath);
-      file.pipe(writeStream);
-    });
-
-    busboy.on('finish', () => {
-      const destination = 'carpeta_en_tu_bucket/nombre_nuevo_archivo.jpg';
-
-      bucket.upload(filePath, {
-        destination: destination,
-        metadata: {
-          contentType: 'image/png',
-        },
-      })
-        .then(() => {
-          fs.unlinkSync(filePath);
-          return res.status(200).json({ message: 'Imagen subida correctamente' });
-        })
-        .catch(error => {
-          return res.status(500).json({ error: 'Error al subir la imagen', details: error });
-        });
-    });
-    busboy.end(req.rawBody);
+  const bucket = admin.storage().bucket();
+  const file = bucket.file(filePath);
+  const stream = file.createWriteStream({
+    metadata: {
+      contentType: uploadFile.mimetype
+    }
   });
+
+  stream.on('error', (e) => {
+    console.error(e);
+    res.status(500).send(e);
+  });
+
+  stream.on('finish', () => {
+    file.makePublic().then(() => {
+      const publicUrl = `https://storage.googleapis.com/${bucket.name}${filePath}`;
+      res.status(200).send("Imagen subida exitosamente.");
+    });
+  });
+
+  stream.end(uploadFile.data);
 });
+
+/* </Endpoints> */
 
 connectDB().then(() => {
   app.listen(PORT, () => {
