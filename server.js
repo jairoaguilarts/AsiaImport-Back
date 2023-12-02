@@ -1,6 +1,10 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
+const { getStorage } = require ('firebase/storage')
+const functions = require('firebase-functions');
+const path = require('path');
+const os = require('os');
 const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
 const cors = require("cors");
@@ -46,6 +50,7 @@ const connectDB = async () => {
     .catch((e) => console.error("Error al conectar con MongoDB", e));
 };
 
+
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -57,6 +62,7 @@ const firebaseConfig = {
 };
 
 const appFirebase = initializeApp(firebaseConfig);
+const storage = getStorage(appFirebase);
 
 // Schemas
 const Usuario = require("./schemas/usuarioSchema");
@@ -67,6 +73,7 @@ app.get("/", (req, res) => {
 });
 
 /* <Endpoints> */
+
 app.get("/productos", async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
@@ -99,6 +106,7 @@ app.get("/buscarProducto", async (req, res) => {
       .send({ message: "Error en la búsqueda", error: error.message });
   }
 });
+
 app.post("/agregarProducto", async (req, res) => {
   const {
     Categoria,
@@ -530,6 +538,44 @@ app.get("/empleados", (req, res) => {
 });
 
 /* </Endpoints> */
+
+exports.uploadImage = functions.https.onRequest((req, res) => {
+  cors(req, res, () => {
+
+    const bucketName = "gs://importasiaauth.appspot.com";
+    const bucket = storage.bucket(bucketName);
+
+    const tmpdir = os.tmpdir();
+    const filePath = path.join(tmpdir, 'image.jpg');
+
+    const busboy = new Busboy({ headers: req.headers });
+
+    busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+      const writeStream = fs.createWriteStream(filePath);
+      file.pipe(writeStream);
+    });
+
+    busboy.on('finish', () => {
+      const destination = 'carpeta_en_tu_bucket/nombre_nuevo_archivo.jpg';
+
+      bucket.upload(filePath, {
+        destination: destination,
+        metadata: {
+          contentType: 'image/png',
+        },
+      })
+        .then(() => {
+          fs.unlinkSync(filePath);
+          return res.status(200).json({ message: 'Imagen subida correctamente' });
+        })
+        .catch(error => {
+          return res.status(500).json({ error: 'Error al subir la imagen', details: error });
+        });
+    });
+    busboy.end(req.rawBody);
+  });
+});
+
 
 connectDB().then(() => {
   app.listen(PORT, () => {
