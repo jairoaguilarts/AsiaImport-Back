@@ -1,11 +1,11 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-const { getStorage } = require('firebase/storage')
-const functions = require('firebase-functions');
-const fileUpload = require('express-fileupload');
-const path = require('path');
-const os = require('os');
+const { getStorage } = require("firebase/storage");
+const functions = require("firebase-functions");
+const fileUpload = require("express-fileupload");
+const path = require("path");
+const os = require("os");
 const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
 const cors = require("cors");
@@ -14,7 +14,7 @@ const serviceAccount = require("./importasiaauth-firebase-adminsdk-kwbl3-fa4407d
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: 'importasiaauth.appspot.com',
+  storageBucket: "importasiaauth.appspot.com",
 });
 
 // Configuración de Firebase
@@ -52,7 +52,6 @@ const connectDB = async () => {
     .catch((e) => console.error("Error al conectar con MongoDB", e));
 };
 
-
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -80,6 +79,15 @@ app.get("/productos", async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
     const productos = await Producto.find({}).limit(limit);
+    res.json(productos);
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error al obtener los productos" });
+  }
+});
+
+app.get("/productosUser", async (req, res) => {
+  try {
+    const productos = await Producto.find({});
     res.json(productos);
   } catch (error) {
     res.status(500).json({ mensaje: "Error al obtener los productos" });
@@ -132,6 +140,29 @@ app.get("/buscarProductoNombre", async (req, res) => {
   }
 });
 
+app.get("/buscarProductoModelo", async (req, res) => {
+  try {
+    const { Modelo } = req.query;
+    if (!Modelo) {
+      return res
+        .status(400)
+        .send({ message: "No se ingresó ningún parámetro" });
+    }
+    const productos = await Producto.find({
+      $or: [{ Modelo: new RegExp(Modelo, "i") }],
+    });
+    if (!productos) {
+      return res.status(404).send({ message: "Producto no encontrado" });
+    }
+
+    res.status(200).json(productos);
+  } catch (error) {
+    res
+      .status(500)
+      .send({ message: "Error en la búsqueda", error: error.message });
+  }
+});
+
 app.post("/agregarProducto", async (req, res) => {
   const {
     Categoria,
@@ -156,7 +187,7 @@ app.post("/agregarProducto", async (req, res) => {
     }
 
     if (!req.files || Object.keys(req.files).length === 0) {
-      return res.status(401).send('No se encontraron archivos para subir.');
+      return res.status(401).send("No se encontraron archivos para subir.");
     }
 
     let uploadFile = req.files.uploadedFile;
@@ -166,16 +197,16 @@ app.post("/agregarProducto", async (req, res) => {
     const file = bucket.file(filePath);
     const stream = file.createWriteStream({
       metadata: {
-        contentType: uploadFile.mimetype
-      }
+        contentType: uploadFile.mimetype,
+      },
     });
 
-    stream.on('error', (e) => {
+    stream.on("error", (e) => {
       console.error(e);
       res.status(500).send(e);
     });
 
-    stream.on('finish', async () => {
+    stream.on("finish", async () => {
       try {
         await file.makePublic();
         const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
@@ -191,7 +222,10 @@ app.post("/agregarProducto", async (req, res) => {
         });
 
         await nuevoProducto.save();
-        return res.json({ producto: nuevoProducto, message: "Producto e imagen subidos exitosamente." });
+        return res.json({
+          producto: nuevoProducto,
+          message: "Producto e imagen subidos exitosamente.",
+        });
       } catch (error) {
         console.error(error);
         return res.status(500).send({ error: error.message });
@@ -337,7 +371,8 @@ app.post("/agregarEmpleado", async (req, res) => {
 });
 
 app.put("/modificarProducto", async (req, res) => {
-  const { Descripcion, Caracteristicas, Precio, Cantidad, Categoria } = req.body;
+  const { Descripcion, Caracteristicas, Precio, Cantidad, Categoria } =
+    req.body;
   const { Modelo } = req.query;
   let uploadFile = req.files.uploadedFile;
 
@@ -375,11 +410,11 @@ app.put("/modificarProducto", async (req, res) => {
         },
       });
 
-      stream.on('error', (e) => {
+      stream.on("error", (e) => {
         throw e;
       });
 
-      stream.on('finish', async () => {
+      stream.on("finish", async () => {
         await file.makePublic();
       });
 
