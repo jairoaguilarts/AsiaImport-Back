@@ -85,15 +85,6 @@ app.get("/productos", async (req, res) => {
   }
 });
 
-app.get("/productosUser", async (req, res) => {
-  try {
-    const productos = await Producto.find({});
-    res.json(productos);
-  } catch (error) {
-    res.status(500).json({ mensaje: "Error al obtener los productos" });
-  }
-});
-
 app.get("/buscarProductoCategoria", async (req, res) => {
   try {
     const { Nombre } = req.query;
@@ -148,7 +139,7 @@ app.get("/buscarProductoModelo", async (req, res) => {
         .status(400)
         .send({ message: "No se ingresó ningún parámetro" });
     }
-    const productos = await Producto.find({
+    const productos = await Producto.findOne({
       $or: [{ Modelo: new RegExp(Modelo, "i") }],
     });
     if (!productos) {
