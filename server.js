@@ -108,6 +108,29 @@ app.get("/buscarProducto", async (req, res) => {
       .send({ message: "Error en la búsqueda", error: error.message });
   }
 });
+//busqueda por nombre 
+app.get("/buscarProducto2", async (req, res) => {
+  try {
+    const { Nombre } = req.query;
+    if (!Nombre) {
+      return res
+        .status(400)
+        .send({ message: "No se ingresó ningún parámetro" });
+    }
+    const productos = await Producto.find({
+      $or: [{ Nombre: new RegExp(Nombre, "i") }],
+    });
+    if (!productos) {
+      return res.status(404).send({ message: "Producto no encontrado" });
+    }
+
+    res.status(200).json(productos);
+  } catch (error) {
+    res
+      .status(500)
+      .send({ message: "Error en la búsqueda", error: error.message });
+  }
+});
 
 app.post("/agregarProducto", async (req, res) => {
   const {
