@@ -86,7 +86,7 @@ app.get("/productos", async (req, res) => {
   }
 });
 
-app.get("/buscarProducto", async (req, res) => {
+app.get("/buscarProductoCategoria", async (req, res) => {
   try {
     const { Nombre } = req.query;
     if (!Nombre) {
@@ -108,8 +108,8 @@ app.get("/buscarProducto", async (req, res) => {
       .send({ message: "Error en la búsqueda", error: error.message });
   }
 });
-//busqueda por nombre 
-app.get("/buscarProducto2", async (req, res) => {
+
+app.get("/buscarProductoNombre", async (req, res) => {
   try {
     const { Nombre } = req.query;
     if (!Nombre) {
@@ -337,8 +337,9 @@ app.post("/agregarEmpleado", async (req, res) => {
 });
 
 app.put("/modificarProducto", async (req, res) => {
-  const { Descripcion, Caracteristicas, ImagenID, Precio, Cantidad } = req.body;
+  const { Descripcion, Caracteristicas, Precio, Cantidad, Categoria } = req.body;
   const { Modelo } = req.query;
+  let uploadFile = req.files.uploadedFile;
 
   try {
     let actualizaciones = {};
@@ -348,14 +349,42 @@ app.put("/modificarProducto", async (req, res) => {
     if (Caracteristicas !== undefined) {
       actualizaciones.Caracteristicas = Caracteristicas;
     }
-    if (ImagenID !== undefined) {
-      actualizaciones.ImagenID = ImagenID;
-    }
     if (Precio !== undefined) {
       actualizaciones.Precio = Precio;
     }
     if (Cantidad !== undefined) {
       actualizaciones.Cantidad = Cantidad;
+    }
+    if (uploadFile) {
+      const productoActual = await Producto.findOne({ Modelo });
+      const bucket = admin.storage().bucket();
+
+      /*if (Array.isArray(productoActual.ImagenID)) {
+        for (const path of productoActual.ImagenID) {
+          await bucket.file(path).delete();
+        }
+      } else {
+        await bucket.file(productoActual.ImagenID).delete();
+      }*/
+
+      const newImagePath = `${Categoria}/${uploadFile.name}`;
+      const file = bucket.file(newImagePath);
+      const stream = file.createWriteStream({
+        metadata: {
+          contentType: uploadFile.mimetype,
+        },
+      });
+
+      stream.on('error', (e) => {
+        throw e;
+      });
+
+      stream.on('finish', async () => {
+        await file.makePublic();
+      });
+
+      stream.end(uploadFile.data);
+      actualizaciones.ImagenID = `https://storage.googleapis.com/${bucket.name}/${newImagePath}`;
     }
 
     const productoActualizado = await Producto.findOneAndUpdate(
@@ -370,6 +399,7 @@ app.put("/modificarProducto", async (req, res) => {
 
     res.json(productoActualizado);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
