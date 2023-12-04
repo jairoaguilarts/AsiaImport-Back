@@ -248,13 +248,13 @@ app.delete("/eliminarProducto", async (req, res) => {
     const imagenPath = producto.ImagenID;
     const bucket = admin.storage().bucket();
 
-    if (Array.isArray(imagenPath)) {
+    /*if (Array.isArray(imagenPath)) {
       for (const path of imagenPath) {
         await bucket.file(path).delete();
       }
     } else {
       await bucket.file(imagenPath).delete();
-    }
+    }*/
 
     const result = await Producto.deleteOne({ Modelo });
     if (result.deletedCount === 0) {
