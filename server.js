@@ -317,7 +317,7 @@ app.post("/agregarEmpleado", async (req, res) => {
     userCreatingType,
   } = req.body;
 
-  if (userCreatingType != "*") {
+  if (userCreatingType !== "*") {
     return res
       .status(402)
       .json({ error: "Solo el administrador puede registrar empleados" });
