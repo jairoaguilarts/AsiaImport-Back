@@ -47,6 +47,7 @@ const connectDB = async () => {
     .connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      useFindAndModify: false 
     })
     .then(() => console.log("Conectado a MongoDB"))
     .catch((e) => console.error("Error al conectar con MongoDB", e));
@@ -68,6 +69,9 @@ const storage = getStorage(appFirebase);
 // Schemas
 const Usuario = require("./schemas/usuarioSchema");
 const Producto = require("./schemas/productosSchema");
+const Infog = require("./schemas/InfoGSchema");
+
+const { Console } = require("console");
 
 app.get("/", (req, res) => {
   res.send("Hola Mundo!");
@@ -675,5 +679,58 @@ connectDB().then(() => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
   });
 });
+
+//lo de modificar info 
+app.put("/editarInformacionEmpresa", async (req, res) => {
+  try {
+    const { mision, vision, historia } = req.body;
+    const id = req.query.id; // Cambio aquí: usando 'id' para recibir el _id
+
+    if (!id) {
+      return res.status(400).json({ error: "El ID del documento es necesario para la actualización" });
+    }
+
+    const infoEmpresaActualizada = await Infog.findByIdAndUpdate(
+      id, // Utilizar _id para la búsqueda
+      { mision, vision, historia },
+      { new: true }
+    );
+
+    console.log("Documento actualizado:", infoEmpresaActualizada);
+
+    if (!infoEmpresaActualizada) {
+      return res.status(404).json({ error: "Información de la empresa no encontrada" });
+    }
+
+    res.json({ mensaje: "Información de la empresa actualizada correctamente", infoEmpresaActualizada });
+  } catch (error) {
+    console.error("Error al editar la información de la empresa", error);
+    res.status(500).json({ error: "Error al editar la información de la empresa", message: error.message });
+  }
+});
+app.get("/obtenerInformacion", async (req, res) => {
+  try {
+      const id = req.query.id; // Obtener el _id desde los parámetros de la consulta
+
+      if (!id) {
+          return res.status(400).json({ error: "El ID del documento es necesario para la consulta" });
+      }
+
+      const infoEmpresa = await Infog.findById(id); // Buscar por _id
+
+      if (!infoEmpresa) {
+          return res.status(404).json({ error: "Información de la empresa no encontrada" });
+      }
+
+      // Devolver solo los campos relevantes
+      const { mision, vision, historia } = infoEmpresa;
+      res.json({ mision, vision, historia });
+  } catch (error) {
+      console.error("Error al cargar la información de la empresa", error);
+      res.status(500).json({ error: "Error al cargar la información de la empresa", message: error.message });
+  }
+});
+
+
 
 // // Comentario para trartar de subir el repo a Render
