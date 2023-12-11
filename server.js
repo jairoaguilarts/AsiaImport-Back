@@ -275,6 +275,11 @@ app.post("/signUp", async (req, res) => {
       return res.status(400).json({ error: "Usuario ya registrado" });
     }
 
+    const usuarioExistenteID = await Usuario.findOne({ correo });
+    if (usuarioExistenteID) {
+      return res.status(401).json({ error: "Usuario ya registrado" });
+    }
+
     const userType = "-";
     const nuevoUsuario = new Usuario({
       nombre,
