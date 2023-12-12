@@ -373,13 +373,23 @@ app.post("/agregarEmpleado", async (req, res) => {
 });
 
 app.put("/modificarProducto", async (req, res) => {
-  const { Descripcion, Caracteristicas, Precio, Cantidad, Categoria } =
+  const { Nombre, Descripcion, Caracteristicas, Precio, Cantidad, Categoria, fileSelected } =
     req.body;
   const { Modelo } = req.query;
-  let uploadFile = req.files.uploadedFile;
+  let uploadFile;
+
+  if(fileSelected !== undefined) {
+    uploadFile = req.files.uploadedFile;
+  }  
 
   try {
     let actualizaciones = {};
+    if (Nombre !== undefined) {
+      actualizaciones.Nombre = Nombre;
+    }
+    if (Categoria !== undefined) {
+      actualizaciones.Categoria = Categoria;
+    }
     if (Descripcion !== undefined) {
       actualizaciones.Descripcion = Descripcion;
     }
@@ -392,17 +402,9 @@ app.put("/modificarProducto", async (req, res) => {
     if (Cantidad !== undefined) {
       actualizaciones.Cantidad = Cantidad;
     }
-    if (uploadFile) {
+    if (fileSelected !== undefined) {
       const productoActual = await Producto.findOne({ Modelo });
       const bucket = admin.storage().bucket();
-
-      /*if (Array.isArray(productoActual.ImagenID)) {
-        for (const path of productoActual.ImagenID) {
-          await bucket.file(path).delete();
-        }
-      } else {
-        await bucket.file(productoActual.ImagenID).delete();
-      }*/
 
       const newImagePath = `${Categoria}/${uploadFile.name}`;
       const file = bucket.file(newImagePath);
