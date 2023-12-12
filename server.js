@@ -79,15 +79,17 @@ app.get("/", (req, res) => {
 
 /* <Endpoints> */
 
-app.get("/productos", async (req, res) => {
+
+
+app.get("/productosP", async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 10;
-    const productos = await Producto.find({}).limit(limit);
+    const productos = await Producto.find({});
     res.json(productos);
   } catch (error) {
     res.status(500).json({ mensaje: "Error al obtener los productos" });
   }
 });
+
 
 app.get("/buscarProductoCategoria", async (req, res) => {
   try {
