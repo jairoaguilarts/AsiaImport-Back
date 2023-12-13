@@ -47,7 +47,7 @@ const connectDB = async () => {
     .connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useFindAndModify: false 
+      useFindAndModify: false
     })
     .then(() => console.log("Conectado a MongoDB"))
     .catch((e) => console.error("Error al conectar con MongoDB", e));
@@ -281,7 +281,7 @@ app.post("/signUp", async (req, res) => {
       return res.status(400).json({ error: "Usuario ya registrado" });
     }
 
-    const usuarioExistenteID = await Usuario.findOne({ correo });
+    const usuarioExistenteID = await Usuario.findOne({ numeroIdentidad });
     if (usuarioExistenteID) {
       return res.status(401).json({ error: "Usuario ya registrado" });
     }
@@ -378,9 +378,9 @@ app.put("/modificarProducto", async (req, res) => {
   const { Modelo } = req.query;
   let uploadFile;
 
-  if(fileSelected !== undefined) {
+  if (fileSelected !== undefined) {
     uploadFile = req.files.uploadedFile;
-  }  
+  }
 
   try {
     let actualizaciones = {};
@@ -686,7 +686,7 @@ app.put("/editarInformacionEmpresa", async (req, res) => {
     }
 
     const infoEmpresaActualizada = await Infog.findByIdAndUpdate(
-      id, 
+      id,
       { mision, vision, historia },
       { new: true }
     );
@@ -703,35 +703,33 @@ app.put("/editarInformacionEmpresa", async (req, res) => {
 
 app.get("/obtenerInformacion", async (req, res) => {
   try {
-      const id = req.query.id;
+    const id = req.query.id;
 
-      if (!id) {
-          return res.status(400).json({ error: "El ID del documento es necesario para la consulta" });
-      }
+    if (!id) {
+      return res.status(400).json({ error: "El ID del documento es necesario para la consulta" });
+    }
 
-      const infoEmpresa = await Infog.findById(id);
+    const infoEmpresa = await Infog.findById(id);
 
-      if (!infoEmpresa) {
-          return res.status(404).json({ error: "Información de la empresa no encontrada" });
-      }
+    if (!infoEmpresa) {
+      return res.status(404).json({ error: "Información de la empresa no encontrada" });
+    }
 
-      const { mision, vision, historia } = infoEmpresa;
-      res.json({ mision, vision, historia });
+    const { mision, vision, historia } = infoEmpresa;
+    res.json({ mision, vision, historia });
   } catch (error) {
-      res.status(500).json({ error: "Error al cargar la información de la empresa", message: error.message });
+    res.status(500).json({ error: "Error al cargar la información de la empresa", message: error.message });
   }
 });
 
-
 app.put("/destacarProducto", async (req, res) => {
-  const { Destacado} =
-    req.body;
+  const { Destacado } = req.body;
   const { Modelo } = req.query;
   try {
-    
+
     const productoDestacado = await Producto.findOneAndUpdate(
       { Modelo },
-      {Destacado},
+      { Destacado },
       { new: true }
     );
 
@@ -741,11 +739,28 @@ app.put("/destacarProducto", async (req, res) => {
 
     res.json(productoDestacado);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
+app.post("/agregarCarrito", async (req, res) => {
+  const { firebaseUID, Modelo } = req.body;
+
+  try {
+    const user = await Usuario.findOne({ firebaseUID });
+    if (!user) {
+      return res.status(404).send('Usuario no encontrado');
+    }
+
+    // Agregar el item al carrito de compras del usuario
+    user.carritoCompras.push(Modelo);
+    await user.save();
+
+    res.status(200).send('Item agregado al carrito de compras');
+  } catch (error) {
+    res.status(500).send('Error al agregar item al carrito: ' + error.message);
+  }
+});
 
 /* </Endpoints> */
 
