@@ -72,6 +72,7 @@ const Producto = require("./schemas/productosSchema");
 const Infog = require("./schemas/InfoGSchema");
 
 const { Console } = require("console");
+const productos = require("./schemas/productosSchema");
 
 app.get("/", (req, res) => {
   res.send("Hola Mundo!");
@@ -752,13 +753,35 @@ app.post("/agregarCarrito", async (req, res) => {
       return res.status(404).send('Usuario no encontrado');
     }
 
-    // Agregar el item al carrito de compras del usuario
     user.carritoCompras.push(Modelo);
     await user.save();
 
     res.status(200).send('Item agregado al carrito de compras');
   } catch (error) {
     res.status(500).send('Error al agregar item al carrito: ' + error.message);
+  }
+});
+
+app.get("/obtenerCarrito/:firebaseUID", async (req, res) => {
+  const { firebaseUID } = req.params;
+
+  try {
+    const user = await Usuario.findOne({ firebaseUID });
+    if (!user) {
+      return res.status(404).send('Usuario no encontrado');
+    }
+
+    let productos = [];
+    
+    for(const Modelo of user.carritoCompras) {
+      let prod = await Producto.findOne({ Modelo })
+      if(prod) {
+        productos.push(prod);
+      }
+    }
+    res.json(productos);
+  } catch (error) {
+    res.status(500).send('Error al obtener carrito');
   }
 });
 
