@@ -36,6 +36,10 @@ const productosSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  Destacado:{
+    type:Boolean,
+    required:false,
+  }
 });
 
 const productos = mongoose.model("productos", productosSchema);

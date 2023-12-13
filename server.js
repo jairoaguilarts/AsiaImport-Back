@@ -722,6 +722,31 @@ app.get("/obtenerInformacion", async (req, res) => {
   }
 });
 
+
+app.put("/destacarProducto", async (req, res) => {
+  const { Destacado} =
+    req.body;
+  const { Modelo } = req.query;
+  try {
+    
+    const productoDestacado = await Producto.findOneAndUpdate(
+      { Modelo },
+      {Destacado},
+      { new: true }
+    );
+
+    if (!productoDestacado) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
+
+    res.json(productoDestacado);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+
 /* </Endpoints> */
 
 connectDB().then(() => {
