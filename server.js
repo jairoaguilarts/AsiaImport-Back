@@ -753,6 +753,12 @@ app.post("/agregarCarrito", async (req, res) => {
       return res.status(404).send('Usuario no encontrado');
     }
 
+    // Verificar si el modelo ya está en el carrito
+    const existeProducto = user.carritoCompras.find(item => item === Modelo);
+    if (existeProducto) {
+      return res.status(400).send('El producto ya está en el carrito');
+    }
+
     user.carritoCompras.push(Modelo);
     await user.save();
 
