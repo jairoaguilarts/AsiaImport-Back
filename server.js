@@ -9,12 +9,21 @@ const os = require("os");
 const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
 const cors = require("cors");
+const nodemailer = require('nodemailer');
 
 const serviceAccount = require("./importasiaauth-firebase-adminsdk-kwbl3-fa4407d620.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: "importasiaauth.appspot.com",
+});
+
+let transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD
+  }
 });
 
 // Configuración de Firebase
@@ -936,7 +945,30 @@ app.put("/editarPoliticaPrivacidad", async (req, res) => {
   }
 });
 
+app.post('/send-complaint', (req, res) => {
+  const { historia, datosPersonales } = req.body; // Ahora esperamos un objeto datosPersonales
 
+  try {
+    let mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: 'importasiaquejas@gmail.com', 
+      subject: 'Nueva Queja o Reclamo',
+      text: `Historia de la queja o reclamo: ${historia}\nNombre: ${datosPersonales.nombre}\nEdad: ${datosPersonales.edad}`,
+    };
+    
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error al enviar el correo:', error);
+        return res.status(500).json({ message: 'Error al enviar el correo', error: error.message });
+      }
+      console.log('Email enviado:', info.response);
+      res.status(200).json({ message: 'Correo enviado exitosamente' });
+    });
+  } catch (error) {
+    console.error('Error en el servidor:', error);
+    res.status(500).json({ message: 'Error en el servidor', error: error.message });
+  }
+});
 /* </Endpoints> */
 
 connectDB().then(() => {
