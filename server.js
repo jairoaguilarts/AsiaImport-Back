@@ -805,10 +805,10 @@ app.get("/obtenerCarrito/:firebaseUID", async (req, res) => {
     }
 
     let productos = [];
-    
-    for(const Modelo of user.carritoCompras) {
+
+    for (const Modelo of user.carritoCompras) {
       let prod = await Producto.findOne({ Modelo })
-      if(prod) {
+      if (prod) {
         productos.push(prod);
       }
     }
@@ -894,14 +894,13 @@ app.post("/eliminarImgCarruselInicio", async (req, res) => {
       return res.status(400).json({ error: "No se pueden eliminar imágenes, el limite minimo es de 2 imagenes" });
     }
 
-    carrusel.imagenID = carrusel.imagenID.filter((url) => url !== imageUrl);
+    const index = carrusel.imagenID.findIndex((url) => url === imageUrl);
+    if (index !== -1) {
+      carrusel.imagenID.splice(index, 1);
+    } else {
+      return res.status(404).json({ error: "La imagen no se encontro en la lista" })
+    }
     await carrusel.save();
-
-    const bucket = admin.storage().bucket();
-    const fileName = imageUrl;
-    const storageFile = bucket.file(fileName);
-
-    await storageFile.delete();
 
     return res.json({ success: true });
   } catch (error) {
