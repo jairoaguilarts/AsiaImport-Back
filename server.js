@@ -70,6 +70,8 @@ const storage = getStorage(appFirebase);
 const Usuario = require("./schemas/usuarioSchema");
 const Producto = require("./schemas/productosSchema");
 const Infog = require("./schemas/InfoGSchema");
+const Carrusel = require("./schemas/carruselSchema");
+const Politica = require('./schemas/politicaSchema');
 
 const { Console } = require("console");
 const productos = require("./schemas/productosSchema");
@@ -815,6 +817,126 @@ app.get("/obtenerCarrito/:firebaseUID", async (req, res) => {
     res.status(500).send('Error al obtener carrito');
   }
 });
+app.post("/agregarImgCarruselInicio", async (req, res) => {
+  try {
+
+    let uploadFile = req.files.uploadedFile;
+    if (!uploadFile) {
+      return res.status(400).json({ error: "No se proporcionó ningún archivo." });
+    }
+
+    const bucket = admin.storage().bucket();
+    const fileName = `Carrusel_Inicio/${uploadFile.name}`;
+    const storageFile = bucket.file(fileName);
+
+    const carrusel = await Carrusel.findOne();
+    if (carrusel.imagenID.length > 5) {
+      return res.status(400).json({ error: "Se alcanzó el límite máximo de 5 imágenes." });
+    }
+
+    const stream = storageFile.createWriteStream({
+      metadata: {
+        contentType: uploadFile.mimetype
+      },
+    });
+
+    stream.on("error", (e) => {
+      console.error(e);
+      res.status(500).send(e);
+    });
+
+    stream.on("finish", async () => {
+      try {
+
+        await storageFile.makePublic();
+        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+        carrusel.imagenID.push(publicUrl);
+        await carrusel.save();
+
+        return res.json({ success: true });
+
+      } catch (error) {
+        console.error(error);
+        return res.status(500).send({ error: error.message })
+      }
+    });
+
+    stream.end(uploadFile.data);
+  } catch (error) {
+    res.status(500).json({ error: "Error al agregar imagenes " + error.message });
+  }
+});
+
+app.get("/obtenerCarruselInicio", async (req, res) => {
+  try {
+    console.log("Hola!!");
+    const carruselData = await Carrusel.find({});
+    if (!carruselData) {
+      return res.status(404).json({ error: "No se encontraron datos en el carrusel" });
+    }
+
+    res.json(carruselData);
+
+  } catch (error) {
+    res.status(500).send({ error: "Error al extraer las imagenes " + error.message })
+  }
+});
+
+app.post("/eliminarImgCarruselInicio", async (req, res) => {
+  try {
+    const { imageUrl } = req.body;
+    if (!imageUrl) {
+      return res.status(400).json({ error: "Selecciona una imagen" });
+    }
+
+    const carrusel = await Carrusel.findOne();
+    if (carrusel.imagenID.length < 2) {
+      return res.status(400).json({ error: "No se pueden eliminar imágenes, el limite minimo es de 2 imagenes" });
+    }
+
+    carrusel.imagenID = carrusel.imagenID.filter((url) => url !== imageUrl);
+    await carrusel.save();
+
+    const bucket = admin.storage().bucket();
+    const fileName = imageUrl;
+    const storageFile = bucket.file(fileName);
+
+    await storageFile.delete();
+
+    return res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al eliminar la imagen " + error.message });
+  }
+});
+app.get("/politicas", async (req, res) => {
+  try {
+    const politicas = await Politica.find({});
+    res.json(politicas);
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error al obtener las políticas" });
+  }
+});
+
+app.put("/editarPoliticaPrivacidad", async (req, res) => {
+  try {
+    const { contenido } = req.body;
+    const politicaActualizada = await Politica.findOneAndUpdate(
+      { titulo: "Políticas de privacidad de asia import" },
+      { contenido },
+      { new: true, upsert: true }
+    );
+
+    if (!politicaActualizada) {
+      return res.status(404).json({ error: "Política de privacidad no encontrada" });
+    }
+
+    res.json({ mensaje: "Política de privacidad actualizada correctamente", politicaActualizada });
+  } catch (error) {
+    res.status(500).json({ error: "Error al editar la política de privacidad", message: error.message });
+  }
+});
+
 
 /* </Endpoints> */
 
