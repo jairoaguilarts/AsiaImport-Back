@@ -953,7 +953,7 @@ app.post('/send-complaint', (req, res) => {
       from: process.env.EMAIL_USER,
       to: 'importasiaquejas@gmail.com', 
       subject: 'Nueva Queja o Reclamo',
-      text: `Historia de la queja o reclamo: ${historia}\nNombre: ${datosPersonales.nombre}\nEdad: ${datosPersonales.edad}`,
+      text: `Historia de la queja o reclamo: ${historia}\nNombre: ${datosPersonales.nombre}\nEdad: ${datosPersonales.edad}\nCorreo Electrónico: ${datosPersonales.email}`, 
     };
     
     transporter.sendMail(mailOptions, (error, info) => {
