@@ -850,6 +850,28 @@ app.get("/obtenerCarrito/:firebaseUID", async (req, res) => {
     res.status(500).send('Error al obtener carrito');
   }
 });
+app.get("/obtenerFavoritos/:firebaseUID", async (req, res) => {
+  const { firebaseUID } = req.params;
+
+  try {
+    const user = await Usuario.findOne({ firebaseUID });
+    if (!user) {
+      return res.status(404).send('Usuario no encontrado');
+    }
+
+    let productos = [];
+
+    for (const Modelo of user.favoritos) {
+      let prod = await Producto.findOne({ Modelo })
+      if (prod) {
+        productos.push(prod);
+      }
+    }
+    res.json(productos);
+  } catch (error) {
+    res.status(500).send('Error al obtener carrito');
+  }
+});
 app.post("/agregarImgCarruselInicio", async (req, res) => {
   try {
 
