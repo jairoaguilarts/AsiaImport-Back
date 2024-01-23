@@ -827,7 +827,7 @@ app.delete("/eliminarDelCarrito", async (req, res) => {
     res.status(500).send('Error al eliminar el producto del carrito: ' + error.message);
   }
 });
-app.delete("/", async (req, res) => {
+app.delete("/eliminarDeFavoritos", async (req, res) => {
   const { firebaseUID, Modelo } = req.body;
 
   try {
@@ -846,9 +846,9 @@ app.delete("/", async (req, res) => {
     }
 
     await user.save();
-    res.status(200).send('Producto eliminado del carrito de compras');
+    res.status(200).send('Producto eliminado de favoritos ');
   } catch (error) {
-    res.status(500).send('Error al eliminar el producto del carrito: ' + error.message);
+    res.status(500).send('Error al eliminar el producto de favoritos : ' + error.message);
   }
 });
 
