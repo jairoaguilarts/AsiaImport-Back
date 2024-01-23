@@ -779,6 +779,30 @@ app.post("/agregarCarrito", async (req, res) => {
   }
 });
 
+app.post("/agregarFavoritos", async (req, res) => {
+  const { firebaseUID, Modelo } = req.body;
+
+  try {
+    const user = await Usuario.findOne({ firebaseUID });
+    if (!user) {
+      return res.status(404).send('Usuario no encontrado');
+    }
+
+    // Verificar si el modelo ya está en el carrito
+    const existeProducto = user.favoritos.find(item => item === Modelo);
+    if (existeProducto) {
+      return res.status(400).send('El producto ya está en el carrito');
+    }
+
+    user.favoritos.push(Modelo);
+    await user.save();
+
+    res.status(200).send('Item agregado al carrito de compras');
+  } catch (error) {
+    res.status(500).send('Error al agregar item al carrito: ' + error.message);
+  }
+});
+
 app.delete("/eliminarDelCarrito", async (req, res) => {
   const { firebaseUID, Modelo } = req.body;
 
