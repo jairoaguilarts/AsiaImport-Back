@@ -456,13 +456,11 @@ app.put("/modificarProducto", async (req, res) => {
 });
 
 app.put("/modificarEmpleado", async (req, res) => {
-  const { nombre, apellido, numeroIdentidad, userModifyingType } = req.body;
+  const { nombre, apellido, numeroIdentidad, correo, userType } = req.body;
   const { firebaseUID } = req.query;
 
-  if (userModifyingType != "*" || userModifyingType != "+") {
-    return res
-      .status(402)
-      .json({ error: "Solo el administrador puede modificar empleados" });
+  if (userType != "*") {
+    return res.status(402).json({ error: "Solo un admin puede modificar empleados" });
   }
 
   try {
@@ -475,6 +473,9 @@ app.put("/modificarEmpleado", async (req, res) => {
     }
     if (numeroIdentidad !== undefined) {
       actualizaciones.numeroIdentidad = numeroIdentidad;
+    }
+    if (correo !== undefined) {
+      actualizaciones.correo = correo;
     }
     const usuario = await Usuario.findOneAndUpdate(
       { firebaseUID },
@@ -490,6 +491,7 @@ app.put("/modificarEmpleado", async (req, res) => {
       nombre: usuario.nombre,
       apellido: usuario.apellido,
       numeroIdentidad: usuario.numeroIdentidad,
+      correo: usuario.correo,
     });
   } catch (error) {
     res.status(500).json({ error: "Error interno del servidor" });
@@ -686,6 +688,26 @@ app.get("/empleados", (req, res) => {
     .catch((error) => {
       res.status(500).json({ error: "Error al obtener empleados" });
     });
+});
+
+app.get("/soloEmpleado", async (req, res) => {
+  const { firebaseUID } = req.query;
+  try {
+    const usuario = await Usuario.findOne({ firebaseUID });
+
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+    res.json({
+      nombre: usuario.nombre,
+      apellido: usuario.apellido,
+      numeroIdentidad: usuario.numeroIdentidad,
+      correo: usuario.correo,
+    });
+  } catch (error) {
+    console.error("Error al obtener información del empleado:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
 });
 
 app.put("/editarInformacionEmpresa", async (req, res) => {
