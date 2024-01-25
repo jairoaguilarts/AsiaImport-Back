@@ -81,6 +81,7 @@ const Producto = require("./schemas/productosSchema");
 const Infog = require("./schemas/InfoGSchema");
 const Carrusel = require("./schemas/carruselSchema");
 const Politica = require('./schemas/politicaSchema');
+const Entrega=require("./schemas/entregaSchema");
 
 const { Console } = require("console");
 const productos = require("./schemas/productosSchema");
@@ -1061,6 +1062,28 @@ app.post('/send-complaint', (req, res) => {
     res.status(500).json({ message: 'Error en el servidor', error: error.message });
   }
 });
+app.post('/crearEntrega', async (req, res) => {
+  try {   
+    const { departamento, municipio, direccion, puntoreferencia, id_usuario, estadoOrden, fecha_ingreso, numerotelefono } = req.body;
+    const nuevaEntrega = new Entrega({
+      departamento,
+      municipio,
+      direccion,
+      puntoreferencia,
+      id_usuario,
+      estadoOrden,
+      fecha_ingreso,
+      numerotelefono
+    });
+    await nuevaEntrega.save();
+    res.status(201).json({ message: 'Entrega creada exitosamente', entrega: nuevaEntrega });
+  } catch (error) {
+    console.error("Error al crear entrega:", error);
+    res.status(500).json({ message: 'Error al crear entrega', error: error.message });
+  }
+});
+
+
 /* </Endpoints> */
 
 connectDB().then(() => {
