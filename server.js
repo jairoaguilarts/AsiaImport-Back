@@ -1105,7 +1105,9 @@ app.post('/crearEntregaPickup', async (req, res) => {
   }
 });
 
-
+app.get("/checkout", (req, res)=>res.send("checkout" ));
+app.get ("/success", (req, res)=>res. send ("success" ));
+app.get ("/cancel", (req, res) => res.send("cancel"));
 /* </Endpoints> */
 
 connectDB().then(() => {
