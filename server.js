@@ -81,7 +81,8 @@ const Producto = require("./schemas/productosSchema");
 const Infog = require("./schemas/InfoGSchema");
 const Carrusel = require("./schemas/carruselSchema");
 const Politica = require('./schemas/politicaSchema');
-const Entrega=require("./schemas/entregaSchema");
+const Entrega = require("./schemas/entregaSchema");
+const PickUp = require("./schemas/pickupSchema");
 
 const { Console } = require("console");
 const productos = require("./schemas/productosSchema");
@@ -1039,16 +1040,16 @@ app.put("/editarPoliticaPrivacidad", async (req, res) => {
 });
 
 app.post('/send-complaint', (req, res) => {
-  const { historia, datosPersonales } = req.body; // Ahora esperamos un objeto datosPersonales
+  const { historia, datosPersonales } = req.body;
 
   try {
     let mailOptions = {
       from: process.env.EMAIL_USER,
-      to: 'importasiaquejas@gmail.com', 
+      to: 'importasiaquejas@gmail.com',
       subject: 'Nueva Queja o Reclamo',
-      text: `Historia de la queja o reclamo: ${historia}\nNombre: ${datosPersonales.nombre}\nEdad: ${datosPersonales.edad}\nCorreo Electrónico: ${datosPersonales.email}`, 
+      text: `Historia de la queja o reclamo: ${historia}\nNombre: ${datosPersonales.nombre}\nEdad: ${datosPersonales.edad}\nCorreo Electrónico: ${datosPersonales.email}`,
     };
-    
+
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error('Error al enviar el correo:', error);
@@ -1063,7 +1064,7 @@ app.post('/send-complaint', (req, res) => {
   }
 });
 app.post('/crearEntrega', async (req, res) => {
-  try {   
+  try {
     const { departamento, municipio, direccion, puntoreferencia, id_usuario, estadoOrden, fecha_ingreso, numerotelefono } = req.body;
     const nuevaEntrega = new Entrega({
       departamento,
@@ -1077,6 +1078,27 @@ app.post('/crearEntrega', async (req, res) => {
     });
     await nuevaEntrega.save();
     res.status(201).json({ message: 'Entrega creada exitosamente', entrega: nuevaEntrega });
+  } catch (error) {
+    console.error("Error al crear entrega:", error);
+    res.status(500).json({ message: 'Error al crear entrega', error: error.message });
+  }
+});
+
+app.post('/crearEntregaPickup', async (req, res) => {
+  try {
+    const { nombreUser, identidadUser, id_usuario, estadoOrden, fecha_ingreso, numerotelefono } = req.body;
+    const nuevoPickup = new PickUp({
+      nombreUser,
+      identidadUser,
+      id_usuario,
+      estadoOrden,
+      fecha_ingreso,
+      numerotelefono, 
+    });
+
+    await nuevoPickup.save();
+    res.status(201).json({ message: 'Entrega creada exitosamente', pickup: nuevoPickup });
+
   } catch (error) {
     console.error("Error al crear entrega:", error);
     res.status(500).json({ message: 'Error al crear entrega', error: error.message });
