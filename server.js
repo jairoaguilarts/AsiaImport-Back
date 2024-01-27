@@ -83,7 +83,7 @@ const Carrusel = require("./schemas/carruselSchema");
 const Politica = require('./schemas/politicaSchema');
 const Entrega = require("./schemas/entregaSchema");
 const PickUp = require("./schemas/pickupSchema");
-const Orden = require("./schemas/ordenSchema");
+//const Orden = require("./schemas/ordenSchema");
 
 const { Console } = require("console");
 const productos = require("./schemas/productosSchema");

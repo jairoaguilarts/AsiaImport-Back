@@ -33,7 +33,7 @@ const entregaSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-}, { discriminatorKey: 'order_type' });
+});
 
 const entregas = mongoose.model("entregas", entregaSchema);
 module.exports = entregas;
