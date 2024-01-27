@@ -1106,7 +1106,7 @@ app.post('/crearEntregaPickup', async (req, res) => {
   }
 });
 
-app.post('/CrearOrden', async (req, res) => {
+/*app.post('/CrearOrden', async (req, res) => {
   const { order_id, id_usuario, order_type, estadoOrden, fecha_ingreso, entrega_id } = req.body;
   const user = Usuario.findById({ firebaseUID: id_usuario });
   if (!user) {
@@ -1152,7 +1152,7 @@ app.post('/CrearOrden', async (req, res) => {
     console.error(error);
     res.status(500).json({ mensaje: "Error en el servidor" });
   }
-});
+});*/
 
 app.get("/checkout", (req, res) => res.send("checkout"));
 app.get("/success", (req, res) => res.send("success"));
