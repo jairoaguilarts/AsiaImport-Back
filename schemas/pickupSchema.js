@@ -25,7 +25,7 @@ const pickupSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-});
+}, { discriminatorKey: 'order_type' });
 
 const pickups = mongoose.model("pickup", pickupSchema);
 module.exports = pickups;

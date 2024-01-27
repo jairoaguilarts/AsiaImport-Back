@@ -83,6 +83,7 @@ const Carrusel = require("./schemas/carruselSchema");
 const Politica = require('./schemas/politicaSchema');
 const Entrega = require("./schemas/entregaSchema");
 const PickUp = require("./schemas/pickupSchema");
+const Orden = require("./schemas/ordenSchema");
 
 const { Console } = require("console");
 const productos = require("./schemas/productosSchema");
@@ -1093,7 +1094,7 @@ app.post('/crearEntregaPickup', async (req, res) => {
       id_usuario,
       estadoOrden,
       fecha_ingreso,
-      numerotelefono, 
+      numerotelefono,
     });
 
     await nuevoPickup.save();
@@ -1105,9 +1106,57 @@ app.post('/crearEntregaPickup', async (req, res) => {
   }
 });
 
-app.get("/checkout", (req, res)=>res.send("checkout" ));
-app.get ("/success", (req, res)=>res. send ("success" ));
-app.get ("/cancel", (req, res) => res.send("cancel"));
+app.post('/CrearOrden', async (req, res) => {
+  const { order_id, id_usuario, order_type, estadoOrden, fecha_ingreso, entrega_id } = req.body;
+  const user = Usuario.findById({ firebaseUID: id_usuario });
+  if (!user) {
+    return res.status(404).send('Usuario no encontrado');
+  }
+
+  try {
+    const nuevaOrden = new Orden({
+      order_id,
+      id_usuario,
+      order_type,
+      carrito: user.carritoCompras,
+      detalles: {},
+      estadoOrden,
+      fecha_ingreso,
+      entrega_id,
+    });
+
+    if (order_type === "pickup") {
+
+      const instancia_pickup = await PickUp.findById(entrega_id);
+      if (!instancia_pickup) {
+        return res.status(400).json({ mensaje: "Instancia de Pickup no encontrada" });
+      }
+      nuevaOrden.detalles = instancia_pickup;
+
+    } else if (order_type === "entregas") {
+
+      const instancia_entregas = await Entrega.findById(entrega_id);
+      if (!instancia_entregas) {
+        return res.status(400).json({ mensaje: "Instancia de Entrega no encontrada" });
+      }
+      nuevaOrden.detalles = instancia_entregas;
+
+    } else {
+      return res.status(400).json({ mensaje: "Tipo de orden no válido" });
+    }
+
+    await nuevaOrden.save();
+    res.status(201).json({ mensaje: "Orden creada exitosamente" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error en el servidor" });
+  }
+});
+
+app.get("/checkout", (req, res) => res.send("checkout"));
+app.get("/success", (req, res) => res.send("success"));
+app.get("/cancel", (req, res) => res.send("cancel"));
 /* </Endpoints> */
 
 connectDB().then(() => {
