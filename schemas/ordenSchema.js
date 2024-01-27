@@ -41,4 +41,4 @@ const ordenSchema = new mongoose.Schema({
 });     
 
 const orden = mongoose.model("orden", ordenSchema);
-module.exports = { orden };
+module.exports = orden;
