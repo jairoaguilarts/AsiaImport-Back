@@ -1102,7 +1102,7 @@ app.post('/crearEntrega', async (req, res) => {
 
 app.post('/CrearOrden', async (req, res) => {
   const { order_id, firebaseUID, detalles, Fecha } = req.body;
-  const user = await Usuario.findOne({ firebaseUID: firebaseUID });  if (!user) { 
+  const user = await Usuario.findOne({ firebaseUID: firebaseUID }); if (!user) {
     return res.status(404).send("Usuario no encontrado");
   }
 
@@ -1136,30 +1136,33 @@ app.post('/agregarDireccion', async (req, res) => {
   try {
     const nuevaDir = new Direccion({
       userFirebaseUID,
-      departamento, 
+      departamento,
       municipio,
-      direccion, 
+      direccion,
       puntoReferencia,
       numeroTelefono
     });
 
     await nuevaDir.save();
-    res.status(201).json({message: 'Direccion agregada exitosamente', direccion: nuevaDir});
+    res.status(201).json({ message: 'Direccion agregada exitosamente', direccion: nuevaDir });
 
   } catch (error) {
-    res.status(500).json({message: 'Error al crear nueva direccion', error: error.message});
+    res.status(500).json({ message: 'Error al crear nueva direccion', error: error.message });
   }
 });
 
 app.get('/cargarDirecciones', async (req, res) => {
-  const { userFirebaseUID } = req.params;
-  Direccion.find({ userFirebaseUID })
-    .then((direcciones) => {
-      res.json(direcciones);
-    })
-    .catch((error) => {
-      res.status(500).json({ error: "Error al obtener direcciones" });
-    });
+  const { userFirebaseUID } = req.query;
+  try {
+    const direcciones = await Direccion.find({ userFirebaseUID });
+    if (direcciones) {
+      res.status(200).json({ direcciones });
+    } else {
+      res.status(401).json({ message: "Error al obtener direcciones" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error al cargar direcciones", error: error.message });
+  }
 });
 
 app.get("/checkout", (req, res) => res.send("checkout"));
