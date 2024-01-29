@@ -3,21 +3,17 @@ const mongoose = require("mongoose");
 const entregaSchema = new mongoose.Schema({
   departamento: {
     type: String,
-    required: true,
   },
   municipio: {
     type: String,
-    required: true,
   },
   direccion: {
     type: String,
-    required: true,
   },
   puntoreferencia: {
     type: String,
-    required: true,
   },
-  id_usuario: {
+  firebaseUID: {
     type: String,
     required: true,
   },
@@ -33,7 +29,17 @@ const entregaSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  nombreUsuario: {
+    type: String,
+  },
+  identidadUsuario: {
+    type: String,
+  },
+  tipoOrden: {
+    type: String,
+    required: true,
+  },
 });
 
-const entregas = mongoose.model("entregas", entregaSchema);
-module.exports = entregas;
+const Entrega = mongoose.model("Entrega", entregaSchema, "entregas");
+module.exports = Entrega;

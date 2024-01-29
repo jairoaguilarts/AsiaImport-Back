@@ -82,11 +82,9 @@ const Infog = require("./schemas/InfoGSchema");
 const Carrusel = require("./schemas/carruselSchema");
 const Politica = require('./schemas/politicaSchema');
 const Entrega = require("./schemas/entregaSchema");
-const PickUp = require("./schemas/pickupSchema");
-//const Orden = require("./schemas/ordenSchema");
+const Orden = require("./schemas/ordenSchema");
 
 const { Console } = require("console");
-const productos = require("./schemas/productosSchema");
 
 app.get("/", (req, res) => {
   res.send("Hola Mundo!");
@@ -1064,18 +1062,34 @@ app.post('/send-complaint', (req, res) => {
     res.status(500).json({ message: 'Error en el servidor', error: error.message });
   }
 });
+
 app.post('/crearEntrega', async (req, res) => {
   try {
-    const { departamento, municipio, direccion, puntoreferencia, id_usuario, estadoOrden, fecha_ingreso, numerotelefono } = req.body;
+    const {
+      departamento,
+      municipio,
+      direccion,
+      puntoreferencia,
+      firebaseUID,
+      estadoOrden,
+      fecha_ingreso,
+      numerotelefono,
+      nombreUsuario,
+      identidadUsuario,
+      tipoOrden } = req.body;
+
     const nuevaEntrega = new Entrega({
       departamento,
       municipio,
       direccion,
       puntoreferencia,
-      id_usuario,
+      firebaseUID,
       estadoOrden,
       fecha_ingreso,
-      numerotelefono
+      numerotelefono,
+      nombreUsuario,
+      identidadUsuario,
+      tipoOrden,
     });
     await nuevaEntrega.save();
     res.status(201).json({ message: 'Entrega creada exitosamente', entrega: nuevaEntrega });
@@ -1085,65 +1099,27 @@ app.post('/crearEntrega', async (req, res) => {
   }
 });
 
-app.post('/crearEntregaPickup', async (req, res) => {
-  try {
-    const { nombreUser, identidadUser, id_usuario, estadoOrden, fecha_ingreso, numerotelefono } = req.body;
-    const nuevoPickup = new PickUp({
-      nombreUser,
-      identidadUser,
-      id_usuario,
-      estadoOrden,
-      fecha_ingreso,
-      numerotelefono,
-    });
-
-    await nuevoPickup.save();
-    res.status(201).json({ message: 'Entrega creada exitosamente', pickup: nuevoPickup });
-
-  } catch (error) {
-    console.error("Error al crear entrega:", error);
-    res.status(500).json({ message: 'Error al crear entrega', error: error.message });
+app.post('/CrearOrden', async (req, res) => {
+  const { order_id, firebaseUID, detalles, Fecha } = req.body;
+  const user = await Usuario.findOne({ firebaseUID: firebaseUID });  if (!user) { 
+    return res.status(404).send("Usuario no encontrado");
   }
-});
 
-/*app.post('/CrearOrden', async (req, res) => {
-  const { order_id, id_usuario, order_type, estadoOrden, fecha_ingreso, entrega_id } = req.body;
-  const user = Usuario.findById({ firebaseUID: id_usuario });
-  if (!user) {
-    return res.status(404).send('Usuario no encontrado');
+  const entregaExistente = await Entrega.findById(detalles);
+  if (!entregaExistente) {
+    return res.status(404).send("Entrega no encontrada");
   }
 
   try {
     const nuevaOrden = new Orden({
       order_id,
-      id_usuario,
-      order_type,
+      firebaseUID,
+      tipoOrden: entregaExistente.tipoOrden,
       carrito: user.carritoCompras,
-      detalles: {},
-      estadoOrden,
-      fecha_ingreso,
-      entrega_id,
+      detalles,
+      estadoOrden: entregaExistente.estadoOrden,
+      Fecha,
     });
-
-    if (order_type === "pickup") {
-
-      const instancia_pickup = await PickUp.findById(entrega_id);
-      if (!instancia_pickup) {
-        return res.status(400).json({ mensaje: "Instancia de Pickup no encontrada" });
-      }
-      nuevaOrden.detalles = instancia_pickup;
-
-    } else if (order_type === "entregas") {
-
-      const instancia_entregas = await Entrega.findById(entrega_id);
-      if (!instancia_entregas) {
-        return res.status(400).json({ mensaje: "Instancia de Entrega no encontrada" });
-      }
-      nuevaOrden.detalles = instancia_entregas;
-
-    } else {
-      return res.status(400).json({ mensaje: "Tipo de orden no válido" });
-    }
 
     await nuevaOrden.save();
     res.status(201).json({ mensaje: "Orden creada exitosamente" });
@@ -1152,7 +1128,7 @@ app.post('/crearEntregaPickup', async (req, res) => {
     console.error(error);
     res.status(500).json({ mensaje: "Error en el servidor" });
   }
-});*/
+});
 
 app.get("/checkout", (req, res) => res.send("checkout"));
 app.get("/success", (req, res) => res.send("success"));
