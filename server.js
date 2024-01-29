@@ -83,6 +83,7 @@ const Carrusel = require("./schemas/carruselSchema");
 const Politica = require('./schemas/politicaSchema');
 const Entrega = require("./schemas/entregaSchema");
 const Orden = require("./schemas/ordenSchema");
+const Direccion = require("./schemas/direccionSchema");
 
 const { Console } = require("console");
 
@@ -1128,6 +1129,37 @@ app.post('/CrearOrden', async (req, res) => {
     console.error(error);
     res.status(500).json({ mensaje: "Error en el servidor" });
   }
+});
+
+app.post('/agregarDireccion', async (req, res) => {
+  const { userFirebaseUID, departamento, municipio, direccion, puntoReferencia, numeroTelefono } = req.body;
+  try {
+    const nuevaDir = new Direccion({
+      userFirebaseUID,
+      departamento, 
+      municipio,
+      direccion, 
+      puntoReferencia,
+      numeroTelefono
+    });
+
+    await nuevaDir.save();
+    res.status(201).json({message: 'Direccion agregada exitosamente', direccion: nuevaDir});
+
+  } catch (error) {
+    res.status(500).json({message: 'Error al crear nueva direccion', error: error.message});
+  }
+});
+
+app.get('/cargarDirecciones', async (req, res) => {
+  const { userFirebaseUID } = req.params;
+  Direccion.find({ userFirebaseUID })
+    .then((direcciones) => {
+      res.json(direcciones);
+    })
+    .catch((error) => {
+      res.status(500).json({ error: "Error al obtener direcciones" });
+    });
 });
 
 app.get("/checkout", (req, res) => res.send("checkout"));
