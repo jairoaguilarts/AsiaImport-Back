@@ -1165,6 +1165,20 @@ app.get('/cargarDirecciones', async (req, res) => {
   }
 });
 
+app.get('/cargarDireccion', async (req, res) => {
+  const { _id } = req.query;
+  try {
+    const direccion = await Direccion.find({ _id });
+    if(direccion) {
+      res.status(200).json({ direccion });
+    } else {
+      res.status(401).json({message: "Error al obtener direccion"});
+    }
+  } catch(error) {
+    res.status(500).json({ message: "Error al cargar direccion", error: error.message });
+  }
+});
+
 app.get("/checkout", (req, res) => res.send("checkout"));
 app.get("/success", (req, res) => res.send("success"));
 app.get("/cancel", (req, res) => res.send("cancel"));
