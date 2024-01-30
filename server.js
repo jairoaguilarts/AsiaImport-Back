@@ -328,7 +328,7 @@ app.post("/signUp", async (req, res) => {
     await nuevoUsuario.save();
     res.json(nuevoUsuario);
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    res.status(500).send({ error: "Error en el server", message: error.message });
   }
 });
 
@@ -780,21 +780,26 @@ app.put("/destacarProducto", async (req, res) => {
 });
 
 app.post("/agregarCarrito", async (req, res) => {
-  const { firebaseUID, Modelo } = req.body;
+  const { firebaseUID, Modelo, cantidad } = req.body;
 
   try {
     const user = await Usuario.findOne({ firebaseUID });
     if (!user) {
       return res.status(404).send('Usuario no encontrado');
     }
+    user.cantidadCarrito.push(cantidad);
 
-    // Verificar si el modelo ya está en el carrito
-    const existeProducto = user.carritoCompras.find(item => item === Modelo);
-    if (existeProducto) {
+    //const existeProducto = user.carritoCompras.find(item => item === Modelo);
+    const indexProducto = user.carritoCompras.findIndex(item => item === Modelo);
+    /*if (existeProducto) {
+      return res.status(400).send('El producto ya está en el carrito');
+    }*/
+    if (indexProducto === -1) {
+      user.carritoCompras.push(Modelo);
+    } else {
       return res.status(400).send('El producto ya está en el carrito');
     }
 
-    user.carritoCompras.push(Modelo);
     await user.save();
 
     res.status(200).send('Item agregado al carrito de compras');
@@ -836,14 +841,13 @@ app.delete("/eliminarDelCarrito", async (req, res) => {
       return res.status(404).send('Usuario no encontrado');
     }
 
-    // Filtrar el carrito para eliminar el producto con el modelo dado
-    const carritoOriginal = user.carritoCompras;
-    user.carritoCompras = carritoOriginal.filter(item => item !== Modelo);
-
-    // Si la longitud del carrito no cambia, el producto no estaba en el carrito
-    if (carritoOriginal.length === user.carritoCompras.length) {
-      return res.status(404).send('Producto no encontrado en el carrito');
+    const indexProducto = user.carritoCompras.findIndex(item => item === Modelo);
+    if (indexProducto === -1) {
+      return res.status(404).send("Producto inexistente en el carrito");
     }
+
+    user.carritoCompras.splice(indexProducto, 1);
+    user.cantidadCarrito.splice(indexProducto, 1);
 
     await user.save();
     res.status(200).send('Producto eliminado del carrito de compras');
@@ -851,6 +855,7 @@ app.delete("/eliminarDelCarrito", async (req, res) => {
     res.status(500).send('Error al eliminar el producto del carrito: ' + error.message);
   }
 });
+
 app.delete("/eliminarDeFavoritos", async (req, res) => {
   const { firebaseUID, Modelo } = req.body;
 
@@ -898,6 +903,68 @@ app.get("/obtenerCarrito/:firebaseUID", async (req, res) => {
     res.status(500).send('Error al obtener carrito');
   }
 });
+
+app.get("/obtenerCantidadesCarrito/:firebaseUID", async (req, res) => {
+  const { firebaseUID } = req.params;
+
+  try {
+    const user = await Usuario.findOne({ firebaseUID });
+    if (!user) {
+      return res.status(404).send('Usuario no encontrado');
+    }
+
+    res.json(user.cantidadCarrito);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+app.post("/actualizarCantidadCarrito", async (req, res) => {
+  const { firebaseUID, Modelo, cantidad } = req.body;
+
+  try {
+    const user = await Usuario.findOne({ firebaseUID });
+    if (!user) {
+      return res.status(404).send('Usuario no encontrado');
+    }
+
+    const indexProducto = user.carritoCompras.findIndex(item => item === Modelo);
+    if (indexProducto !== -1) {
+      user.cantidadCarrito[indexProducto] = cantidad;
+      user.markModified('cantidadCarrito');
+      await user.save();
+      res.status(200).send('Cantidad actualizada correctamente');
+    } else {
+      res.status(404).send('Producto no encontrado en el carrito');
+    }
+  } catch (error) {
+    res.status(500).send('Error al actualizar la cantidad del carrito: ' + error.message);
+  }
+});
+
+app.post("/actualizarTotalCarrito", async (req, res) => {
+  const { firebaseUID, totalCarrito } = req.body;
+
+  if (totalCarrito < 0) {
+    return res.status(400).send('El total del carrito no puede ser negativo');
+  }
+
+  try {
+    const user = await Usuario.findOne({ firebaseUID });
+    if (!user) {
+      return res.status(404).send('Usuario no encontrado');
+    }
+
+    user.totalCarrito = totalCarrito; // Actualizar el total del carrito
+    await user.save();
+
+    res.status(200).send('Total del carrito actualizado correctamente');
+  } catch (error) {
+    res.status(500).send('Error al actualizar el total del carrito: ' + error.message);
+  }
+});
+
 app.get("/obtenerFavoritos/:firebaseUID", async (req, res) => {
   const { firebaseUID } = req.params;
 
@@ -1117,8 +1184,10 @@ app.post('/CrearOrden', async (req, res) => {
       firebaseUID,
       tipoOrden: entregaExistente.tipoOrden,
       carrito: user.carritoCompras,
+      cantidades: user.cantidadCarrito,
       detalles,
       estadoOrden: entregaExistente.estadoOrden,
+      total: user.totalCarrito,
       Fecha,
     });
 
@@ -1169,12 +1238,12 @@ app.get('/cargarDireccion', async (req, res) => {
   const { _id } = req.query;
   try {
     const direccion = await Direccion.find({ _id });
-    if(direccion) {
+    if (direccion) {
       res.status(200).json({ direccion });
     } else {
-      res.status(401).json({message: "Error al obtener direccion"});
+      res.status(401).json({ message: "Error al obtener direccion" });
     }
-  } catch(error) {
+  } catch (error) {
     res.status(500).json({ message: "Error al cargar direccion", error: error.message });
   }
 });

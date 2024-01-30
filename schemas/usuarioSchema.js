@@ -30,11 +30,20 @@ const UsuariosSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  cantidadCarrito: {
+    type: [String],
+    default: [],
+  },
+  totalCarrito: {
+    type: String,
+    default: "",
+    required: false,
+  },
   favoritos: {
     type: [String],
     default: [],
   },
 });
 
-const usuario = mongoose.model("usuario", UsuariosSchema);
+const usuario = mongoose.model("usuario", UsuariosSchema, "usuarios");
 module.exports = usuario;
