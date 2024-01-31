@@ -8,6 +8,10 @@ const ordenSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+    nombre_usuario: {
+        type: String,
+        required: true,
+    },
     firebaseUID: {
         type: String,
         required: true,

@@ -1165,7 +1165,8 @@ app.post('/crearEntrega', async (req, res) => {
 
 app.post('/CrearOrden', async (req, res) => {
   const { order_id, firebaseUID, detalles, Fecha } = req.body;
-  const user = await Usuario.findOne({ firebaseUID: firebaseUID }); if (!user) {
+  const user = await Usuario.findOne({ firebaseUID: firebaseUID }); 
+  if (!user) {
     return res.status(404).send("Usuario no encontrado");
   }
 
@@ -1177,6 +1178,7 @@ app.post('/CrearOrden', async (req, res) => {
   try {
     const nuevaOrden = new Orden({
       order_id,
+      nombre_usuario: user.nombre + " " + user.apellido,
       firebaseUID,
       tipoOrden: entregaExistente.tipoOrden,
       carrito: user.carritoCompras,
@@ -1202,6 +1204,25 @@ app.get('/ordenes', async (req, res) => {
       res.status(200).json(todasLasOrdenes);
   } catch (error) {
       res.status(500).json({ mensaje: "Error al recuperar las ordenes", error });
+  }
+});
+
+app.post('/actualizarEstado', async (req, res) => {
+  try {
+    const { estadoNuevo, _orderId } = req.body;
+
+    const orden = await Orden.findOne({ order_id: _orderId });
+    if (!orden) {
+      return res.status(404).json({ message: "Orden no encontrada" });
+    }
+
+    orden.estadoOrden = estadoNuevo;
+    await orden.save();
+    
+    res.status(200).json({ message: "Estado de la orden actualizado", orden });
+  } catch (error) {
+    console.error('Error al actualizar el estado de la orden:', error);
+    res.status(500).json({ message: "Error al actualizar el estado de la orden", error });
   }
 });
 
@@ -1252,25 +1273,7 @@ app.get('/cargarDireccion', async (req, res) => {
     res.status(500).json({ message: "Error al cargar direccion", error: error.message });
   }
 });
-app.post('/actualizarEstado', async (req, res) => {
-  try {
-    const { estadoNuevo, _orderId } = req.body;
 
-    // Cambia aquí para buscar por el campo que sea el identificador numérico
-    const orden = await Orden.findOne({ order_id: _orderId }); // Suponiendo que 'order_id' es el campo correcto
-    if (!orden) {
-      return res.status(404).json({ message: "Orden no encontrada" });
-    }
-
-    orden.estadoOrden = estadoNuevo;
-    await orden.save();
-    
-    res.status(200).json({ message: "Estado de la orden actualizado", orden });
-  } catch (error) {
-    console.error('Error al actualizar el estado de la orden:', error);
-    res.status(500).json({ message: "Error al actualizar el estado de la orden", error });
-  }
-});
 app.get("/checkout", (req, res) => res.send("checkout"));
 app.get("/success", (req, res) => res.send("success"));
 app.get("/cancel", (req, res) => res.send("cancel"));
