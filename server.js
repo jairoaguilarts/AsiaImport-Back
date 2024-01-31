@@ -1252,7 +1252,25 @@ app.get('/cargarDireccion', async (req, res) => {
     res.status(500).json({ message: "Error al cargar direccion", error: error.message });
   }
 });
+app.post('/actualizarEstado', async (req, res) => {
+  try {
+    const { estadoNuevo, _orderId } = req.body;
 
+    // Cambia aquí para buscar por el campo que sea el identificador numérico
+    const orden = await Orden.findOne({ order_id: _orderId }); // Suponiendo que 'order_id' es el campo correcto
+    if (!orden) {
+      return res.status(404).json({ message: "Orden no encontrada" });
+    }
+
+    orden.estadoOrden = estadoNuevo;
+    await orden.save();
+    
+    res.status(200).json({ message: "Estado de la orden actualizado", orden });
+  } catch (error) {
+    console.error('Error al actualizar el estado de la orden:', error);
+    res.status(500).json({ message: "Error al actualizar el estado de la orden", error });
+  }
+});
 app.get("/checkout", (req, res) => res.send("checkout"));
 app.get("/success", (req, res) => res.send("success"));
 app.get("/cancel", (req, res) => res.send("cancel"));
