@@ -789,11 +789,7 @@ app.post("/agregarCarrito", async (req, res) => {
     }
     user.cantidadCarrito.push(cantidad);
 
-    //const existeProducto = user.carritoCompras.find(item => item === Modelo);
     const indexProducto = user.carritoCompras.findIndex(item => item === Modelo);
-    /*if (existeProducto) {
-      return res.status(400).send('El producto ya está en el carrito');
-    }*/
     if (indexProducto === -1) {
       user.carritoCompras.push(Modelo);
     } else {
@@ -1197,6 +1193,15 @@ app.post('/CrearOrden', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error en el servidor" });
+  }
+});
+
+app.get('/ordenes', async (req, res) => {
+  try {
+      const todasLasOrdenes = await Orden.find().populate('detalles');
+      res.status(200).json(todasLasOrdenes);
+  } catch (error) {
+      res.status(500).json({ mensaje: "Error al recuperar las ordenes", error });
   }
 });
 
