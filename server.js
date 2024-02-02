@@ -1210,12 +1210,10 @@ app.get('/ordenes', async (req, res) => {
 app.post('/actualizarEstado', async (req, res) => {
   try {
     const { estadoNuevo, _orderId } = req.body;
-
-    const orden = await Orden.findOne({ order_id: _orderId });
+    const orden = await Orden.findOne({ _id: _orderId });
     if (!orden) {
       return res.status(404).json({ message: "Orden no encontrada" });
     }
-
     orden.estadoOrden = estadoNuevo;
     await orden.save();
 
@@ -1225,6 +1223,7 @@ app.post('/actualizarEstado', async (req, res) => {
     res.status(500).json({ message: "Error al actualizar el estado de la orden", error });
   }
 });
+
 
 app.post('/agregarDireccion', async (req, res) => {
   const { userFirebaseUID, departamento, municipio, direccion, puntoReferencia, numeroTelefono } = req.body;
