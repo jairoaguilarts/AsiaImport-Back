@@ -1189,7 +1189,7 @@ app.post('/crearOrden', async (req, res) => {
     });
 
     await nuevaOrden.save();
-    res.status(201).json({ mensaje: "Orden creada exitosamente" });
+    res.status(201).send(nuevaOrden);
 
   } catch (error) {
     console.error(error);

@@ -3,11 +3,6 @@ const Entrega = require("./entregaSchema");
 const { type } = require("os");
 
 const ordenSchema = new mongoose.Schema({
-    order_id: {
-        type: String,
-        required: true,
-        unique: true,
-    },
     nombre_usuario: {
         type: String,
         required: true,
