@@ -1156,16 +1156,16 @@ app.post('/crearEntrega', async (req, res) => {
       tipoOrden,
     });
     await nuevaEntrega.save();
-    res.status(201).json({ message: 'Entrega creada exitosamente', entrega: nuevaEntrega });
+    res.status(201).send(nuevaEntrega);
   } catch (error) {
     console.error("Error al crear entrega:", error);
     res.status(500).json({ message: 'Error al crear entrega', error: error.message });
   }
 });
 
-app.post('/CrearOrden', async (req, res) => {
-  const { order_id, firebaseUID, detalles, Fecha } = req.body;
-  const user = await Usuario.findOne({ firebaseUID: firebaseUID }); 
+app.post('/crearOrden', async (req, res) => {
+  const { firebaseUID, detalles, Fecha } = req.body;
+  const user = await Usuario.findOne({ firebaseUID: firebaseUID });
   if (!user) {
     return res.status(404).send("Usuario no encontrado");
   }
@@ -1177,7 +1177,6 @@ app.post('/CrearOrden', async (req, res) => {
 
   try {
     const nuevaOrden = new Orden({
-      order_id,
       nombre_usuario: user.nombre + " " + user.apellido,
       firebaseUID,
       tipoOrden: entregaExistente.tipoOrden,
@@ -1200,10 +1199,10 @@ app.post('/CrearOrden', async (req, res) => {
 
 app.get('/ordenes', async (req, res) => {
   try {
-      const todasLasOrdenes = await Orden.find().populate('detalles');
-      res.status(200).json(todasLasOrdenes);
+    const todasLasOrdenes = await Orden.find().populate('detalles');
+    res.status(200).json(todasLasOrdenes);
   } catch (error) {
-      res.status(500).json({ mensaje: "Error al recuperar las ordenes", error });
+    res.status(500).json({ mensaje: "Error al recuperar las ordenes", error });
   }
 });
 
@@ -1218,7 +1217,7 @@ app.post('/actualizarEstado', async (req, res) => {
 
     orden.estadoOrden = estadoNuevo;
     await orden.save();
-    
+
     res.status(200).json({ message: "Estado de la orden actualizado", orden });
   } catch (error) {
     console.error('Error al actualizar el estado de la orden:', error);
