@@ -38,6 +38,9 @@ const ordenSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    detallePago: {
+        type: String
+    },
     total: {
         type: String,
     },
