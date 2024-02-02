@@ -1179,6 +1179,7 @@ app.post('/crearOrden', async (req, res) => {
     const nuevaOrden = new Orden({
       nombre_usuario: user.nombre + " " + user.apellido,
       firebaseUID,
+      correo: user.correo,
       tipoOrden: entregaExistente.tipoOrden,
       carrito: user.carritoCompras,
       cantidades: user.cantidadCarrito,

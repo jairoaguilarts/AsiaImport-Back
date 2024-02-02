@@ -11,6 +11,10 @@ const ordenSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    correo: {
+        type: String,
+        required: true,
+    },
     tipoOrden: {
         type: String,
         required: true,
