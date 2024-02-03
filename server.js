@@ -1198,6 +1198,20 @@ app.post('/crearOrden', async (req, res) => {
   }
 });
 
+app.get('/obtenerEntrega', async (req, res) => {
+  const { _id } = req.query;
+  try {
+    const entrega = await Entrega.find({ _id });
+    if (entrega) {
+      res.status(200).send(entrega);
+    } else {
+      res.status(401).json({ message: "Error al obtener direccion" });
+    }
+  } catch(error) {
+    res.status(500).json({ mensaje: "Error al obtener la orden", error });
+  }
+});
+
 app.get('/ordenes', async (req, res) => {
   try {
     const todasLasOrdenes = await Orden.find().populate('detalles');
