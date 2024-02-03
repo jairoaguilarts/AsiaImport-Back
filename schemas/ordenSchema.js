@@ -13,7 +13,7 @@ const ordenSchema = new mongoose.Schema({
     },
     correo: {
         type: String,
-        required: true,
+       
     },
     tipoOrden: {
         type: String,
