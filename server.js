@@ -1332,6 +1332,40 @@ app.post('/usuarioAfterPago/:firebaseUID', async (req, res) => {
     res.status(500).send(error);
   }
 });
+app.delete('/eliminarOrden', async (req, res) => {
+  console.log("Solicitud recibida para eliminar orden");
+
+  // Extraer el ID de la orden desde los parámetros de la consulta
+  const { ordenId } = req.query; 
+  console.log("ID de la orden a eliminar:", ordenId);
+
+  // Verificar si se proporcionó el ID de la orden
+  if (!ordenId) {
+    console.log("No se proporcionó el ID de la orden");
+    return res.status(400).json({ error: "Se requiere el ID de la orden para eliminarla" });
+  }
+
+  try {
+    // Intentar encontrar y eliminar la orden por su ID
+    console.log("Buscando la orden para eliminar...");
+    const resultado = await Orden.findByIdAndDelete(ordenId);
+
+    // Verificar si se encontró y eliminó la orden
+    if (!resultado) {
+      console.log("Orden no encontrada o ya fue eliminada");
+      return res.status(404).json({ mensaje: "Orden no encontrada o ya fue eliminada" });
+    }
+
+    // Responder con un mensaje de éxito
+    console.log("Orden eliminada exitosamente");
+    res.status(200).json({ mensaje: "Orden eliminada exitosamente" });
+  } catch (error) {
+    // Manejar cualquier error que ocurra durante la eliminación
+    console.error("Error al eliminar la orden:", error);
+    res.status(500).json({ mensaje: "Error al eliminar la orden", error: error.message });
+  }
+});
+
 
 app.get("/checkout", (req, res) => res.send("checkout"));
 app.get("/success", (req, res) => res.send("success"));
