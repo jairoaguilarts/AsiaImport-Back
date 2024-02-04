@@ -1197,6 +1197,35 @@ app.post('/crearOrden', async (req, res) => {
     res.status(500).json({ mensaje: "Error en el servidor" });
   }
 });
+app.get('/obtenerCorreo', async (req, res) => {
+  // Obtener el firebaseUID desde los parámetros de la consulta
+  const { firebaseUID } = req.query;
+
+  // Verificar si se proporcionó el firebaseUID
+  if (!firebaseUID) {
+    return res.status(400).send("No se proporcionó firebaseUID");
+  }
+
+  try {
+    // Buscar el usuario por firebaseUID
+    const user = await Usuario.findOne({ firebaseUID: firebaseUID });
+
+    // Verificar si el usuario existe
+    if (!user) {
+      return res.status(404).send("Usuario no encontrado");
+    }
+
+    // Devolver el nombre y el correo del usuario encontrado
+    res.status(200).json({
+      nombre: user.nombre + " " + user.apellido,
+      correo: user.correo,
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error en el servidor" });
+  }
+});
 
 app.get('/obtenerEntrega', async (req, res) => {
   const { _id } = req.query;
