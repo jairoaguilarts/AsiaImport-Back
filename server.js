@@ -1207,7 +1207,7 @@ app.get('/obtenerEntrega', async (req, res) => {
     } else {
       res.status(401).json({ message: "Error al obtener direccion" });
     }
-  } catch(error) {
+  } catch (error) {
     res.status(500).json({ mensaje: "Error al obtener la orden", error });
   }
 });
@@ -1284,6 +1284,23 @@ app.get('/cargarDireccion', async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ message: "Error al cargar direccion", error: error.message });
+  }
+});
+
+app.post('/usuarioAfterPago/:firebaseUID', async (req, res) => {
+  try {
+    const { firebaseUID } = req.params;
+    const updates = req.body;
+
+    const usuario = await Usuario.findOneAndUpdate({ firebaseUID: firebaseUID }, updates, { new: true });
+
+    if (!usuario) {
+      return res.status(404).send('Usuario no encontrado');
+    }
+
+    res.send(usuario);
+  } catch (error) {
+    res.status(500).send(error);
   }
 });
 
