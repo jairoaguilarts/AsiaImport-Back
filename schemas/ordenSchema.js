@@ -37,6 +37,10 @@ const ordenSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    estadoPago: {
+        type: String,
+        required: true,
+    },
     detallePago: {
         type: String
     },

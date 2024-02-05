@@ -1164,7 +1164,7 @@ app.post('/crearEntrega', async (req, res) => {
 });
 
 app.post('/crearOrden', async (req, res) => {
-  const { firebaseUID, detalles, Fecha } = req.body;
+  const { firebaseUID, detalles, estadoPago, Fecha } = req.body;
   const user = await Usuario.findOne({ firebaseUID: firebaseUID });
   if (!user) {
     return res.status(404).send("Usuario no encontrado");
@@ -1185,6 +1185,7 @@ app.post('/crearOrden', async (req, res) => {
       cantidades: user.cantidadCarrito,
       detalles,
       estadoOrden: entregaExistente.estadoOrden,
+      estadoPago,
       total: user.totalCarrito,
       Fecha,
     });
