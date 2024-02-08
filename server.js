@@ -1129,34 +1129,96 @@ app.post('/send-complaint', (req, res) => {
 });
 
 
-app.post('/send-orderDetails', (req, res) => {
+app.post("/send-orderDetails", (req, res) => {
   const { _orderId, tipoOrden, Fecha, carrito, cantidades, total, correo } = req.body;
 
   try {
-    if (!Array.isArray(carrito) || !Array.isArray(cantidades)) {
-      throw new Error('El carrito y las cantidades deben ser arreglos definidos.');
-    }
+    // Verifica si carrito y cantidades son arreglos, de lo contrario conviértelos en arreglos
+    const carritoArray = Array.isArray(carrito) ? carrito : [carrito];
+    const cantidadesArray = Array.isArray(cantidades) ? cantidades : [cantidades];
 
-    let factura = `Detalles de la orden: ${_orderId}\n`;
-    factura += `Tipo de orden: ${tipoOrden}\n`;
-    factura += `Fecha: ${Fecha}\n\n`;
-    factura += "Productos:\n";
+    let factura = `
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              border: 1px solid #ccc;
+              border-radius: 10px;
+              background-color: #f9f9f9;
+            }
+            h1 {
+              text-align: center;
+            }
+            .details {
+              margin-bottom: 20px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            th, td {
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: left;
+            }
+            th {
+              background-color: #f2f2f2;
+            }
+            .total {
+              margin-top: 20px;
+              text-align: right;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>Detalles de la orden: ${_orderId}</h1>
+            <div class="details">
+              <p><strong>Tipo de orden:</strong> ${tipoOrden}</p>
+              <p><strong>Fecha:</strong> ${Fecha}</p>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                </tr>
+              </thead>
+              <tbody>`;
 
-    if (carrito.length !== cantidades.length) {
+    if (carritoArray.length !== cantidadesArray.length) {
       throw new Error('El número de productos y cantidades no coincide.');
     }
 
-    for (let i = 0; i < carrito.length; i++) {
-      factura += `${carrito[i]} - Cantidad: ${cantidades[i]}\n`;
+    for (let i = 0; i < carritoArray.length; i++) {
+      factura += `
+        <tr>
+          <td>${carritoArray[i]}</td>
+          <td>${cantidadesArray[i]}</td>
+        </tr>`;
     }
 
-    factura += `\nTotal: ${total}`;
+    factura += `
+              </tbody>
+            </table>
+            <div class="total">
+              <p><strong>Total:</strong> ${total}</p>
+            </div>
+          </div>
+        </body>
+      </html>`;
 
     let mailOptions = {
       from: process.env.EMAIL_USER,
       to: correo,
       subject: `Detalles de la orden ${_orderId}`,
-      text: factura,
+      html: factura,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -1167,12 +1229,14 @@ app.post('/send-orderDetails', (req, res) => {
       console.log('Email enviado:', info.response);
       res.status(200).json({ message: 'Correo enviado exitosamente' });
     });
+  
+    // Por ahora, simplemente respondemos con un mensaje de éxito
+    res.status(200).send("Orden recibida con éxito.");
   } catch (error) {
     console.error('Error en el servidor:', error);
     res.status(500).json({ message: 'Error en el servidor', error: error.message });
   }
 });
-
 app.post('/crearEntrega', async (req, res) => {
   try {
     const {
