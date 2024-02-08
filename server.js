@@ -589,6 +589,7 @@ app.get("/perfil", async (req, res) => {
       nombre: usuario.nombre,
       apellido: usuario.apellido,
       numeroIdentidad: usuario.numeroIdentidad,
+      correo:usuario.correo,
     });
   } catch (error) {
     console.error("Error al obtener información del usuario:", error);
@@ -1126,6 +1127,44 @@ app.post('/send-complaint', (req, res) => {
     res.status(500).json({ message: 'Error en el servidor', error: error.message });
   }
 });
+
+
+app.post('/send-orderDetails', (req, res) => {
+  const { _orderId, tipoOrden, Fecha, carrito, cantidades, total, correo } = req.body;
+
+  try {
+    let factura = `Detalles de la orden: ${_orderId}\n`;
+    factura += `Tipo de orden: ${tipoOrden}\n`;
+    factura += `Fecha: ${Fecha}\n\n`;
+    factura += "Productos:\n";
+
+    for (let i = 0; i < carrito.length; i++) {
+      factura += `${carrito[i]} - Cantidad: ${cantidades[i]}\n`;
+    }
+
+    factura += `\nTotal: ${total}`;
+
+    let mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: correo,
+      subject: `Detalles de la orden ${_orderId}`,
+      text: factura,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error al enviar el correo:', error);
+        return res.status(500).json({ message: 'Error al enviar el correo', error: error.message });
+      }
+      console.log('Email enviado:', info.response);
+      res.status(200).json({ message: 'Correo enviado exitosamente' });
+    });
+  } catch (error) {
+    console.error('Error en el servidor:', error);
+    res.status(500).json({ message: 'Error en el servidor', error: error.message });
+  }
+});
+
 
 app.post('/crearEntrega', async (req, res) => {
   try {
