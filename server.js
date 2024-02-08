@@ -1133,7 +1133,6 @@ app.post('/send-orderDetails', (req, res) => {
   const { _orderId, tipoOrden, Fecha, carrito, cantidades, total, correo } = req.body;
 
   try {
-  
     if (!Array.isArray(carrito) || !Array.isArray(cantidades)) {
       throw new Error('El carrito y las cantidades deben ser arreglos definidos.');
     }
@@ -1173,6 +1172,7 @@ app.post('/send-orderDetails', (req, res) => {
     res.status(500).json({ message: 'Error en el servidor', error: error.message });
   }
 });
+
 app.post('/crearEntrega', async (req, res) => {
   try {
     const {
