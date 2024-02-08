@@ -1367,6 +1367,18 @@ app.delete('/eliminarOrden', async (req, res) => {
   }
 });
 
+app.delete('/eliminarDireccion', async (req, res) => {
+  const { _id } = req.query;
+  try {
+    const result = await Direccion.deleteOne({ _id });
+    if (result.deletedCount === 0) {
+      res.status(401).json({ message: "No se pudo eliminar la direccion de manera correcta" });
+    }
+    res.status(201).json({ message: "Direccion eliminada correctamente" });
+  } catch (error) {
+    res.status(500).json({ message: "Error al eliminar direccion", error: error.message })
+  }
+});
 
 app.get("/checkout", (req, res) => res.send("checkout"));
 app.get("/success", (req, res) => res.send("success"));
