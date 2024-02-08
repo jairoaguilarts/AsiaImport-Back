@@ -1251,6 +1251,21 @@ app.get('/ordenes', async (req, res) => {
   }
 });
 
+app.get('/ordenesUsuario', async (req, res) => {
+  try {
+    const { firebaseUID } = req.query;
+    const ordenes = await Orden.find({ firebaseUID });
+
+    if (!ordenes) {
+      return res.status(404).json({ message: "No se encontraron ordenes para este usuario" });
+    }
+
+    res.status(200).json(ordenes);
+  } catch (error) {
+    res.status(500).json({ message: "Error interno en el servidor" });
+  }
+});
+
 app.post('/actualizarEstado', async (req, res) => {
   try {
     const { estadoNuevo, _orderId } = req.body;
@@ -1334,7 +1349,7 @@ app.post('/usuarioAfterPago/:firebaseUID', async (req, res) => {
   }
 });
 app.delete('/eliminarOrden', async (req, res) => {
-  const { ordenId } = req.query; 
+  const { ordenId } = req.query;
 
   if (!ordenId) {
     return res.status(400).json({ error: "Se requiere el ID de la orden para eliminarla" });
