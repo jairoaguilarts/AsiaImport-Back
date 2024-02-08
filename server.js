@@ -781,18 +781,18 @@ app.put("/destacarProducto", async (req, res) => {
 });
 
 app.post("/agregarCarrito", async (req, res) => {
-  const { firebaseUID, Modelo, cantidad } = req.body;
+  const { firebaseUID, Modelo } = req.body;
 
   try {
     const user = await Usuario.findOne({ firebaseUID });
     if (!user) {
       return res.status(404).send('Usuario no encontrado');
     }
-    user.cantidadCarrito.push(cantidad);
 
     const indexProducto = user.carritoCompras.findIndex(item => item === Modelo);
     if (indexProducto === -1) {
       user.carritoCompras.push(Modelo);
+      user.cantidadCarrito.push("1");
     } else {
       return res.status(400).send('El producto ya está en el carrito');
     }
