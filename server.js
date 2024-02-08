@@ -1364,7 +1364,7 @@ app.get('/ordenes', async (req, res) => {
 app.get('/ordenesUsuario', async (req, res) => {
   try {
     const { firebaseUID } = req.query;
-    const ordenes = await Orden.find({ firebaseUID });
+    const ordenes = await Orden.find({ firebaseUID }).populate('detalles');
 
     if (!ordenes) {
       return res.status(404).json({ message: "No se encontraron ordenes para este usuario" });
