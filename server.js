@@ -589,7 +589,7 @@ app.get("/perfil", async (req, res) => {
       nombre: usuario.nombre,
       apellido: usuario.apellido,
       numeroIdentidad: usuario.numeroIdentidad,
-      correo:usuario.correo,
+      correo: usuario.correo,
     });
   } catch (error) {
     console.error("Error al obtener información del usuario:", error);
@@ -1229,7 +1229,7 @@ app.post("/send-orderDetails", (req, res) => {
       console.log('Email enviado:', info.response);
       res.status(200).json({ message: 'Correo enviado exitosamente' });
     });
-  
+
     // Por ahora, simplemente respondemos con un mensaje de éxito
     res.status(200).send("Orden recibida con éxito.");
   } catch (error) {
@@ -1397,17 +1397,22 @@ app.post('/actualizarEstado', async (req, res) => {
 app.post('/agregarDireccion', async (req, res) => {
   const { userFirebaseUID, departamento, municipio, direccion, puntoReferencia, numeroTelefono } = req.body;
   try {
-    const nuevaDir = new Direccion({
-      userFirebaseUID,
-      departamento,
-      municipio,
-      direccion,
-      puntoReferencia,
-      numeroTelefono
-    });
+    const direcciones = await Direccion.find({ userFirebaseUID });
+    if (direcciones.length < 4) {
+      const nuevaDir = new Direccion({
+        userFirebaseUID,
+        departamento,
+        municipio,
+        direccion,
+        puntoReferencia,
+        numeroTelefono
+      });
 
-    await nuevaDir.save();
-    res.status(201).json({ message: 'Direccion agregada exitosamente', direccion: nuevaDir });
+      await nuevaDir.save();
+      res.status(201).json({ message: 'Direccion agregada exitosamente', direccion: nuevaDir });
+    } else {
+      res.status(401).json({ message: "Maximo de direcciones alcanzadas" });
+    }
 
   } catch (error) {
     res.status(500).json({ message: 'Error al crear nueva direccion', error: error.message });
