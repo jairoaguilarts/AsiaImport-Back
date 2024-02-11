@@ -84,6 +84,7 @@ const Politica = require('./schemas/politicaSchema');
 const Entrega = require("./schemas/entregaSchema");
 const Orden = require("./schemas/ordenSchema");
 const Direccion = require("./schemas/direccionSchema");
+const Resena = require('./schemas/resenaSchema');
 
 const { Console } = require("console");
 
@@ -1491,6 +1492,39 @@ app.delete('/eliminarDireccion', async (req, res) => {
     res.status(201).json({ message: "Direccion eliminada correctamente" });
   } catch (error) {
     res.status(500).json({ message: "Error al eliminar direccion", error: error.message })
+  }
+});
+
+app.post('/agregarResena', async (req, res) => {
+  const { userFirebaseUID, Modelo, Calificacion, Titulo, Comentario } = req.body;
+  try {
+    const usuario = await Usuario.findOne({ firebaseUID: userFirebaseUID });
+    if (usuario) {
+      const nuevaResena = Resena({
+        Nombre: usuario.nombre + " " + usuario.apellido,
+        Modelo,
+        Calificacion,
+        Titulo,
+        Comentario
+      });
+
+      await nuevaResena.save();
+      res.status(200).json({ message: "Resena agregada correctamente" });
+    } else {
+      res.status(400).json({ message: "Error al cargar usuario" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error al agregar resena", error: error.message });
+  }
+});
+
+app.get('/cargarResenas', async (req, res) => {
+  const { Modelo } = req.query;
+  try {
+    const resenas = await Resena.find({ Modelo });
+    res.status(200).send(resenas);
+  } catch (error) {
+    res.status(500).json({ message: "Error al cargar resenas", error: error.message });
   }
 });
 
