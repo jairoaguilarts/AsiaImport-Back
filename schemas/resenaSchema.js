@@ -19,6 +19,7 @@ const resenaSchema = new mongoose.Schema({
     },
     Comentario: {
         type: String,
+        required: true,
     },
 });
 
