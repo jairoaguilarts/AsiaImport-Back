@@ -1528,6 +1528,80 @@ app.get('/cargarResenas', async (req, res) => {
   }
 });
 
+app.get("/suma-total-ordenes", async (req, res) => {
+  try {
+    // Define la fecha actual
+    const ahora = new Date();
+    const anoActual = ahora.getFullYear();
+    const mesActual = ahora.getMonth(); // Enero es 0, diciembre es 11
+
+    // Define el primer día del mes y del año
+    const primerDiaDelMes = new Date(anoActual, mesActual, 1);
+    const primerDiaDelAno = new Date(anoActual, 0, 1);
+
+    // Convierte las fechas a formato ISO para la comparación en MongoDB
+    const primerDiaDelMesISO = primerDiaDelMes.toISOString();
+    const primerDiaDelAnoISO = primerDiaDelAno.toISOString();
+
+    // Obtén todas las órdenes
+    const todasLasOrdenes = await Orden.find();
+
+    // Inicializa las sumas
+    let sumaTotal = 0;
+    let sumaMensual = 0;
+    let sumaAnual = 0;
+
+    todasLasOrdenes.forEach((orden) => {
+      if (orden.total) {
+        // Suma al total general
+        sumaTotal += parseFloat(orden.total);
+
+        // Convierte la fecha de la orden a un objeto Date
+        const fechaOrden = new Date(orden.Fecha);
+
+        // Si la fecha de la orden está en el rango del mes actual, suma al total mensual
+        if (fechaOrden >= primerDiaDelMes && fechaOrden <= ahora) {
+          sumaMensual += parseFloat(orden.total);
+        }
+
+        // Si la fecha de la orden está en el rango del año actual, suma al total anual
+        if (fechaOrden >= primerDiaDelAno && fechaOrden <= ahora) {
+          sumaAnual += parseFloat(orden.total);
+        }
+      }
+    });
+
+    res.json({ sumaTotal, sumaMensual, sumaAnual });
+  } catch (error) {
+    console.error("Error al obtener la suma total de órdenes:", error);
+    res
+      .status(500)
+      .json({ error: "Error al obtener la suma total de órdenes" });
+  }
+});
+
+app.get("/conteo-usuarios", async (req, res) => {
+  try {
+    // Realiza el conteo de usuarios por tipo
+    const conteoEmpleado = await Usuario.countDocuments({ userType: "+" });
+    const conteoAdministrador = await Usuario.countDocuments({ userType: "*" });
+
+    // Formatea el resultado
+    const resultado = {
+      "+": conteoEmpleado.toString(),
+      "*": conteoAdministrador.toString(),
+    };
+
+    // Devuelve el conteo de usuarios por tipo como respuesta
+    res.json(resultado);
+  } catch (error) {
+    console.error("Error al obtener el conteo de usuarios por tipo:", error);
+    res
+      .status(500)
+      .json({ error: "Error al obtener el conteo de usuarios por tipo" });
+  }
+});
+
 app.get("/checkout", (req, res) => res.send("checkout"));
 app.get("/success", (req, res) => res.send("success"));
 app.get("/cancel", (req, res) => res.send("cancel"));
