@@ -1390,6 +1390,32 @@ app.post('/actualizarEstado', async (req, res) => {
     res.status(500).json({ message: "Error al actualizar el estado de la orden", error });
   }
 });
+app.get('/consultarEstado', async (req, res) => {
+  console.log('Consulta de estado recibida'); // Para confirmar que el endpoint es alcanzado
+  try {
+    console.log('Parámetros recibidos:', req.query); // Para ver los parámetros de consulta recibidos
+    const { numeroPedido } = req.query;
+    if (!numeroPedido) {
+      console.log('Número de pedido no proporcionado');
+      return res.status(400).json({ message: "Número de pedido no proporcionado" });
+    }
+
+    console.log(`Buscando orden con número de pedido: ${numeroPedido}`);
+    const orden = await Orden.findOne({ _id: numeroPedido });
+
+    if (!orden) {
+      console.log(`Orden no encontrada para el número de pedido: ${numeroPedido}`);
+      return res.status(404).json({ message: "Orden no encontrada" });
+    }
+
+    console.log(`Orden encontrada: ${orden}`);
+    res.status(200).json({ message: `Hemos verificado tu orden y el estado es el siguiente: ${orden.estadoOrden}`, orden });
+  } catch (error) {
+    console.error('Error al consultar el estado de la orden:', error);
+    res.status(500).json({ message: "Error al consultar el estado de la orden", error });
+  }
+});
+
 
 
 app.post('/agregarDireccion', async (req, res) => {
