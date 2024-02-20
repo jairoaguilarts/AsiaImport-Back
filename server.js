@@ -160,8 +160,8 @@ app.get("/buscarProductoModelo", async (req, res) => {
         .status(400)
         .send({ message: "No se ingresó ningún parámetro" });
     }
-    const productos = await Producto.findOne({
-      $or: [{ Modelo: new RegExp(Modelo, "i") }],
+    const productos = await Producto.find({
+      Modelo: new RegExp(Modelo, "i")
     });
     if (!productos) {
       return res.status(404).send({ message: "Producto no encontrado" });
