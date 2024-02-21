@@ -152,7 +152,7 @@ app.get("/buscarProductoNombre", async (req, res) => {
   }
 });
 
-app.get("/buscarProductoModelo", async (req, res) => {
+app.get("/buscarProductoModeloVariante2", async (req, res) => {
   try {
     const { Modelo } = req.query;
     if (!Modelo) {
@@ -162,6 +162,29 @@ app.get("/buscarProductoModelo", async (req, res) => {
     }
     const productos = await Producto.find({
       Modelo: new RegExp(Modelo, "i")
+    });
+    if (!productos) {
+      return res.status(404).send({ message: "Producto no encontrado" });
+    }
+
+    res.status(200).json(productos);
+  } catch (error) {
+    res
+      .status(500)
+      .send({ message: "Error en la búsqueda", error: error.message });
+  }
+});
+
+app.get("/buscarProductoModelo", async (req, res) => {
+  try {
+    const { Modelo } = req.query;
+    if (!Modelo) {
+      return res
+        .status(400)
+        .send({ message: "No se ingresó ningún parámetro" });
+    }
+    const productos = await Producto.findOne({
+      $or: [{ Modelo: new RegExp(Modelo, "i") }],
     });
     if (!productos) {
       return res.status(404).send({ message: "Producto no encontrado" });
