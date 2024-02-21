@@ -1651,6 +1651,30 @@ app.get("/conteo-usuarios", async (req, res) => {
   }
 });
 
+app.post("/reducirCantidades", async (req, res) => {
+  const { firebaseUID } = req.body;
+  try {
+    const user = await Usuario.findOne({ firebaseUID });
+    if (user) {
+      const carrito = user.carritoCompras;
+      const cantidades = user.cantidadCarrito;
+
+      for (let i = 0; i < carrito.length; i++) {
+        const producto = await Producto.findOne({ Modelo: carrito[i] });
+        if (producto && cantidades[i] > 0) {
+          producto.Cantidad -= cantidades[i];
+          await producto.save();
+        }
+      }
+      res.status(200).send("Cantidades modificadas correctamente");
+    } else {
+      res.status(400).send("Error al obtener usuario");
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error al reducir cantidades", error: error.message });
+  }
+});
+
 app.get("/checkout", (req, res) => res.send("checkout"));
 app.get("/success", (req, res) => res.send("success"));
 app.get("/cancel", (req, res) => res.send("cancel"));
