@@ -1301,10 +1301,10 @@ app.post("/send-orderDetails", (req, res) => {
     for (let i = 0; i < carritoArray.length; i++) {
       factura += `
         <tr>
-          <td>${carritoArray[i].nombre}</td>
-          <td><img src="${carritoArray[i].imagen}" alt="${carritoArray[i].nombre}" style="width:50px; height:50px;"></td>
+          <td>${carritoArray[i].nombre_usuario}</td>
+          <td><img src="${carritoArray[i].imagenID}" alt="${carritoArray[i].nombre}" style="width:50px; height:50px;"></td>
           <td>${cantidadesArray[i]}</td>
-          <td>${carritoArray[i].precio}</td>
+          <td>${carritoArray[i].Precio}</td>
         </tr>`;
     }
 
