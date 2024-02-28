@@ -1276,7 +1276,7 @@ app.post("/send-orderDetails", (req, res) => {
         <body>
         <div class="container">
         <div class="logo-container">
-          <img src="https://firebasestorage.googleapis.com/v0/b/importasiaauth.appspot.com/o/OTROS%2Flogo.png?alt=media&token=94226c07-dba1-4395-8271-fef91fc03ad8" alt="Logo Empresa" style="width: 100px;"> <!-- Asegúrate de reemplazar 'URL_DEL_LOGO' con la URL real de tu logo -->
+          <img src="https://firebasestorage.googleapis.com/v0/b/importasiaauth.appspot.com/o/OTROS%2Flogo.png?alt=media&token=94226c07-dba1-4395-8271-fef91fc03ad8" alt="Logo Empresa" style="width: 100px;">
         </div>
         <h1>Detalles de la orden: ${_orderId}</h1>
         <div class="details">
@@ -1294,30 +1294,27 @@ app.post("/send-orderDetails", (req, res) => {
           </thead>
           <tbody>`;
 
-    if (carritoArray.length !== cantidadesArray.length) {
-      throw new Error("El número de productos y cantidades no coincide.");
-    }
-
-    for (let i = 0; i < carritoArray.length; i++) {
+    carritoArray.forEach((producto, index) => {
       factura += `
-        <tr>
-          <td>${carritoArray[i].nombre_usuario}</td>
-          <td><img src="${carritoArray[i].imagenID}" alt="${carritoArray[i].nombre}" style="width:50px; height:50px;"></td>
-          <td>${cantidadesArray[i]}</td>
-          <td>${carritoArray[i].Precio}</td>
-        </tr>`;
-    }
+    <tr>
+      <td>${producto.Nombre}</td>
+      <td><img src="${producto.ImagenID}" alt="Producto" style="width:50px; height:50px;"></td>
+      <td>${cantidadesArray[index]}</td>
+      <td>${producto.Precio}</td>
+    </tr>`;
+    });
 
     factura += `
-              </tbody>
-            </table>
-            <div class="total">
-              <p><strong>Total:</strong> ${total}</p>
-            </div>
-          </div>
-        </body>
-      </html>`;
+          </tbody>
+        </table>
+        <div class="total">
+          <p><strong>Total:</strong> ${total}</p>
+        </div>
+      </div>
+    </body>
+  </html>`;
 
+    // Configuración y envío del correo electrónico
     let mailOptions = {
       from: process.env.EMAIL_USER,
       to: correo,
@@ -1332,12 +1329,9 @@ app.post("/send-orderDetails", (req, res) => {
           .status(500)
           .json({ message: "Error al enviar el correo", error: error.message });
       }
-      console.log("Email enviado:", info.response);
+      console.log("Email enviado: ", info.response);
       res.status(200).json({ message: "Correo enviado exitosamente" });
     });
-
-    // Por ahora, simplemente respondemos con un mensaje de éxito
-    res.status(200).send("Orden recibida con éxito.");
   } catch (error) {
     console.error("Error en el servidor:", error);
     res
