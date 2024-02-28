@@ -1220,7 +1220,6 @@ app.post("/send-complaint", (req, res) => {
 app.post("/send-orderDetails", (req, res) => {
   const { _orderId, tipoOrden, Fecha, carrito, cantidades, total, correo } =
     req.body;
-
   try {
     // Verifica si carrito y cantidades son arreglos, de lo contrario conviértelos en arreglos
     const carritoArray = Array.isArray(carrito) ? carrito : [carrito];
@@ -1275,23 +1274,25 @@ app.post("/send-orderDetails", (req, res) => {
           </style>
         </head>
         <body>
-          <div class="container">
-            <div class="logo-container">
-              <img src="https://firebasestorage.googleapis.com/v0/b/importasiaauth.appspot.com/o/OTROS%2Flogo.png?alt=media&token=94226c07-dba1-4395-8271-fef91fc03ad8" alt="Logo Empresa" style="width: 100px;"> <!-- Ajusta el width según sea necesario -->
-            </div>
-            <h1>Detalles de la orden: ${_orderId}</h1>
-            <div class="details">
-              <p><strong>Tipo de orden:</strong> ${tipoOrden}</p>
-              <p><strong>Fecha:</strong> ${Fecha}</p>
-            </div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th>Cantidad</th>
-                </tr>
-              </thead>
-              <tbody>`;
+        <div class="container">
+        <div class="logo-container">
+          <img src="https://firebasestorage.googleapis.com/v0/b/importasiaauth.appspot.com/o/OTROS%2Flogo.png?alt=media&token=94226c07-dba1-4395-8271-fef91fc03ad8" alt="Logo Empresa" style="width: 100px;"> <!-- Asegúrate de reemplazar 'URL_DEL_LOGO' con la URL real de tu logo -->
+        </div>
+        <h1>Detalles de la orden: ${_orderId}</h1>
+        <div class="details">
+          <p><strong>Tipo de orden:</strong> ${tipoOrden}</p>
+          <p><strong>Fecha:</strong> ${Fecha}</p>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Imagen</th>
+              <th>Cantidad</th>
+              <th>Precio</th>
+            </tr>
+          </thead>
+          <tbody>`;
 
     if (carritoArray.length !== cantidadesArray.length) {
       throw new Error("El número de productos y cantidades no coincide.");
@@ -1300,8 +1301,10 @@ app.post("/send-orderDetails", (req, res) => {
     for (let i = 0; i < carritoArray.length; i++) {
       factura += `
         <tr>
-          <td>${carritoArray[i]}</td>
+          <td>${carritoArray[i].nombre}</td>
+          <td><img src="${carritoArray[i].imagen}" alt="${carritoArray[i].nombre}" style="width:50px; height:50px;"></td>
           <td>${cantidadesArray[i]}</td>
+          <td>${carritoArray[i].precio}</td>
         </tr>`;
     }
 
