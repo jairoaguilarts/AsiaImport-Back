@@ -9,7 +9,7 @@ const os = require("os");
 const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
 const cors = require("cors");
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 const serviceAccount = require("./importasiaauth-firebase-adminsdk-kwbl3-fa4407d620.json");
 
@@ -19,11 +19,11 @@ admin.initializeApp({
 });
 
 let transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD
-  }
+    pass: process.env.EMAIL_PASSWORD,
+  },
 });
 
 // Configuración de Firebase
@@ -56,7 +56,7 @@ const connectDB = async () => {
     .connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useFindAndModify: false
+      useFindAndModify: false,
     })
     .then(() => console.log("Conectado a MongoDB"))
     .catch((e) => console.error("Error al conectar con MongoDB", e));
@@ -80,11 +80,11 @@ const Usuario = require("./schemas/usuarioSchema");
 const Producto = require("./schemas/productosSchema");
 const Infog = require("./schemas/InfoGSchema");
 const Carrusel = require("./schemas/carruselSchema");
-const Politica = require('./schemas/politicaSchema');
+const Politica = require("./schemas/politicaSchema");
 const Entrega = require("./schemas/entregaSchema");
 const Orden = require("./schemas/ordenSchema");
 const Direccion = require("./schemas/direccionSchema");
-const Resena = require('./schemas/resenaSchema');
+const Resena = require("./schemas/resenaSchema");
 
 const { Console } = require("console");
 
@@ -94,8 +94,6 @@ app.get("/", (req, res) => {
 
 /* <Endpoints> */
 
-
-
 app.get("/productosP", async (req, res) => {
   try {
     const productos = await Producto.find({});
@@ -104,7 +102,6 @@ app.get("/productosP", async (req, res) => {
     res.status(500).json({ mensaje: "Error al obtener los productos" });
   }
 });
-
 
 app.get("/buscarProductoCategoria", async (req, res) => {
   try {
@@ -161,7 +158,7 @@ app.get("/buscarProductoModeloVariante2", async (req, res) => {
         .send({ message: "No se ingresó ningún parámetro" });
     }
     const productos = await Producto.find({
-      Modelo: new RegExp(Modelo, "i")
+      Modelo: new RegExp(Modelo, "i"),
     });
     if (!productos) {
       return res.status(404).send({ message: "Producto no encontrado" });
@@ -352,7 +349,9 @@ app.post("/signUp", async (req, res) => {
     await nuevoUsuario.save();
     res.json(nuevoUsuario);
   } catch (error) {
-    res.status(500).send({ error: "Error en el server", message: error.message });
+    res
+      .status(500)
+      .send({ error: "Error en el server", message: error.message });
   }
 });
 
@@ -411,8 +410,15 @@ app.post("/agregarEmpleado", async (req, res) => {
 });
 
 app.put("/modificarProducto", async (req, res) => {
-  const { Nombre, Descripcion, Caracteristicas, Precio, Cantidad, Categoria, fileSelected } =
-    req.body;
+  const {
+    Nombre,
+    Descripcion,
+    Caracteristicas,
+    Precio,
+    Cantidad,
+    Categoria,
+    fileSelected,
+  } = req.body;
   const { Modelo } = req.query;
   let uploadFile;
 
@@ -486,7 +492,9 @@ app.put("/modificarEmpleado", async (req, res) => {
   const { firebaseUID } = req.query;
 
   if (userType != "*") {
-    return res.status(402).json({ error: "Solo un admin puede modificar empleados" });
+    return res
+      .status(402)
+      .json({ error: "Solo un admin puede modificar empleados" });
   }
 
   try {
@@ -743,7 +751,9 @@ app.put("/editarInformacionEmpresa", async (req, res) => {
     const id = req.query.id;
 
     if (!id) {
-      return res.status(400).json({ error: "El ID del documento es necesario para la actualización" });
+      return res.status(400).json({
+        error: "El ID del documento es necesario para la actualización",
+      });
     }
 
     const infoEmpresaActualizada = await Infog.findByIdAndUpdate(
@@ -753,12 +763,20 @@ app.put("/editarInformacionEmpresa", async (req, res) => {
     );
 
     if (!infoEmpresaActualizada) {
-      return res.status(404).json({ error: "Información de la empresa no encontrada" });
+      return res
+        .status(404)
+        .json({ error: "Información de la empresa no encontrada" });
     }
 
-    res.json({ mensaje: "Información de la empresa actualizada correctamente", infoEmpresaActualizada });
+    res.json({
+      mensaje: "Información de la empresa actualizada correctamente",
+      infoEmpresaActualizada,
+    });
   } catch (error) {
-    res.status(500).json({ error: "Error al editar la información de la empresa", message: error.message });
+    res.status(500).json({
+      error: "Error al editar la información de la empresa",
+      message: error.message,
+    });
   }
 });
 
@@ -767,19 +785,26 @@ app.get("/obtenerInformacion", async (req, res) => {
     const id = req.query.id;
 
     if (!id) {
-      return res.status(400).json({ error: "El ID del documento es necesario para la consulta" });
+      return res
+        .status(400)
+        .json({ error: "El ID del documento es necesario para la consulta" });
     }
 
     const infoEmpresa = await Infog.findById(id);
 
     if (!infoEmpresa) {
-      return res.status(404).json({ error: "Información de la empresa no encontrada" });
+      return res
+        .status(404)
+        .json({ error: "Información de la empresa no encontrada" });
     }
 
     const { mision, vision, historia } = infoEmpresa;
     res.json({ mision, vision, historia });
   } catch (error) {
-    res.status(500).json({ error: "Error al cargar la información de la empresa", message: error.message });
+    res.status(500).json({
+      error: "Error al cargar la información de la empresa",
+      message: error.message,
+    });
   }
 });
 
@@ -787,7 +812,6 @@ app.put("/destacarProducto", async (req, res) => {
   const { Destacado } = req.body;
   const { Modelo } = req.query;
   try {
-
     const productoDestacado = await Producto.findOneAndUpdate(
       { Modelo },
       { Destacado },
@@ -810,22 +834,24 @@ app.post("/agregarCarrito", async (req, res) => {
   try {
     const user = await Usuario.findOne({ firebaseUID });
     if (!user) {
-      return res.status(404).send('Usuario no encontrado');
+      return res.status(404).send("Usuario no encontrado");
     }
 
-    const indexProducto = user.carritoCompras.findIndex(item => item === Modelo);
+    const indexProducto = user.carritoCompras.findIndex(
+      (item) => item === Modelo
+    );
     if (indexProducto === -1) {
       user.carritoCompras.push(Modelo);
       user.cantidadCarrito.push("1");
     } else {
-      return res.status(400).send('El producto ya está en el carrito');
+      return res.status(400).send("El producto ya está en el carrito");
     }
 
     await user.save();
 
-    res.status(200).send('Item agregado al carrito de compras');
+    res.status(200).send("Item agregado al carrito de compras");
   } catch (error) {
-    res.status(500).send('Error al agregar item al carrito: ' + error.message);
+    res.status(500).send("Error al agregar item al carrito: " + error.message);
   }
 });
 
@@ -835,21 +861,21 @@ app.post("/agregarFavoritos", async (req, res) => {
   try {
     const user = await Usuario.findOne({ firebaseUID });
     if (!user) {
-      return res.status(404).send('Usuario no encontrado');
+      return res.status(404).send("Usuario no encontrado");
     }
 
     // Verificar si el modelo ya está en el carrito
-    const existeProducto = user.favoritos.find(item => item === Modelo);
+    const existeProducto = user.favoritos.find((item) => item === Modelo);
     if (existeProducto) {
-      return res.status(400).send('El producto ya está en el carrito');
+      return res.status(400).send("El producto ya está en el carrito");
     }
 
     user.favoritos.push(Modelo);
     await user.save();
 
-    res.status(200).send('Item agregado al carrito de compras');
+    res.status(200).send("Item agregado al carrito de compras");
   } catch (error) {
-    res.status(500).send('Error al agregar item al carrito: ' + error.message);
+    res.status(500).send("Error al agregar item al carrito: " + error.message);
   }
 });
 
@@ -859,10 +885,12 @@ app.delete("/eliminarDelCarrito", async (req, res) => {
   try {
     const user = await Usuario.findOne({ firebaseUID });
     if (!user) {
-      return res.status(404).send('Usuario no encontrado');
+      return res.status(404).send("Usuario no encontrado");
     }
 
-    const indexProducto = user.carritoCompras.findIndex(item => item === Modelo);
+    const indexProducto = user.carritoCompras.findIndex(
+      (item) => item === Modelo
+    );
     if (indexProducto === -1) {
       return res.status(404).send("Producto inexistente en el carrito");
     }
@@ -871,9 +899,11 @@ app.delete("/eliminarDelCarrito", async (req, res) => {
     user.cantidadCarrito.splice(indexProducto, 1);
 
     await user.save();
-    res.status(200).send('Producto eliminado del carrito de compras');
+    res.status(200).send("Producto eliminado del carrito de compras");
   } catch (error) {
-    res.status(500).send('Error al eliminar el producto del carrito: ' + error.message);
+    res
+      .status(500)
+      .send("Error al eliminar el producto del carrito: " + error.message);
   }
 });
 
@@ -883,22 +913,24 @@ app.delete("/eliminarDeFavoritos", async (req, res) => {
   try {
     const user = await Usuario.findOne({ firebaseUID });
     if (!user) {
-      return res.status(404).send('Usuario no encontrado');
+      return res.status(404).send("Usuario no encontrado");
     }
 
     // Filtrar el carrito para eliminar el producto con el modelo dado
     const carritoOriginal = user.favoritos;
-    user.favoritos = carritoOriginal.filter(item => item !== Modelo);
+    user.favoritos = carritoOriginal.filter((item) => item !== Modelo);
 
     // Si la longitud del carrito no cambia, el producto no estaba en el carrito
     if (carritoOriginal.length === user.favoritos.length) {
-      return res.status(404).send('Producto no encontrado en el carrito');
+      return res.status(404).send("Producto no encontrado en el carrito");
     }
 
     await user.save();
-    res.status(200).send('Producto eliminado de favoritos ');
+    res.status(200).send("Producto eliminado de favoritos ");
   } catch (error) {
-    res.status(500).send('Error al eliminar el producto de favoritos : ' + error.message);
+    res
+      .status(500)
+      .send("Error al eliminar el producto de favoritos : " + error.message);
   }
 });
 
@@ -908,20 +940,20 @@ app.get("/obtenerCarrito/:firebaseUID", async (req, res) => {
   try {
     const user = await Usuario.findOne({ firebaseUID });
     if (!user) {
-      return res.status(404).send('Usuario no encontrado');
+      return res.status(404).send("Usuario no encontrado");
     }
 
     let productos = [];
 
     for (const Modelo of user.carritoCompras) {
-      let prod = await Producto.findOne({ Modelo })
+      let prod = await Producto.findOne({ Modelo });
       if (prod) {
         productos.push(prod);
       }
     }
     res.json(productos);
   } catch (error) {
-    res.status(500).send('Error al obtener carrito');
+    res.status(500).send("Error al obtener carrito");
   }
 });
 
@@ -931,13 +963,13 @@ app.get("/obtenerCantidadesCarrito/:firebaseUID", async (req, res) => {
   try {
     const user = await Usuario.findOne({ firebaseUID });
     if (!user) {
-      return res.status(404).send('Usuario no encontrado');
+      return res.status(404).send("Usuario no encontrado");
     }
 
     res.json(user.cantidadCarrito);
   } catch (error) {
     console.error(error);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send("Internal Server Error");
   }
 });
 
@@ -947,20 +979,24 @@ app.post("/actualizarCantidadCarrito", async (req, res) => {
   try {
     const user = await Usuario.findOne({ firebaseUID });
     if (!user) {
-      return res.status(404).send('Usuario no encontrado');
+      return res.status(404).send("Usuario no encontrado");
     }
 
-    const indexProducto = user.carritoCompras.findIndex(item => item === Modelo);
+    const indexProducto = user.carritoCompras.findIndex(
+      (item) => item === Modelo
+    );
     if (indexProducto !== -1) {
       user.cantidadCarrito[indexProducto] = cantidad;
-      user.markModified('cantidadCarrito');
+      user.markModified("cantidadCarrito");
       await user.save();
-      res.status(200).send('Cantidad actualizada correctamente');
+      res.status(200).send("Cantidad actualizada correctamente");
     } else {
-      res.status(404).send('Producto no encontrado en el carrito');
+      res.status(404).send("Producto no encontrado en el carrito");
     }
   } catch (error) {
-    res.status(500).send('Error al actualizar la cantidad del carrito: ' + error.message);
+    res
+      .status(500)
+      .send("Error al actualizar la cantidad del carrito: " + error.message);
   }
 });
 
@@ -968,21 +1004,23 @@ app.post("/actualizarTotalCarrito", async (req, res) => {
   const { firebaseUID, totalCarrito } = req.body;
 
   if (totalCarrito < 0) {
-    return res.status(400).send('El total del carrito no puede ser negativo');
+    return res.status(400).send("El total del carrito no puede ser negativo");
   }
 
   try {
     const user = await Usuario.findOne({ firebaseUID });
     if (!user) {
-      return res.status(404).send('Usuario no encontrado');
+      return res.status(404).send("Usuario no encontrado");
     }
 
     user.totalCarrito = totalCarrito; // Actualizar el total del carrito
     await user.save();
 
-    res.status(200).send('Total del carrito actualizado correctamente');
+    res.status(200).send("Total del carrito actualizado correctamente");
   } catch (error) {
-    res.status(500).send('Error al actualizar el total del carrito: ' + error.message);
+    res
+      .status(500)
+      .send("Error al actualizar el total del carrito: " + error.message);
   }
 });
 
@@ -992,29 +1030,30 @@ app.get("/obtenerFavoritos/:firebaseUID", async (req, res) => {
   try {
     const user = await Usuario.findOne({ firebaseUID });
     if (!user) {
-      return res.status(404).send('Usuario no encontrado');
+      return res.status(404).send("Usuario no encontrado");
     }
 
     let productos = [];
 
     for (const Modelo of user.favoritos) {
-      let prod = await Producto.findOne({ Modelo })
+      let prod = await Producto.findOne({ Modelo });
       if (prod) {
         productos.push(prod);
       }
     }
     res.json(productos);
   } catch (error) {
-    res.status(500).send('Error al obtener carrito');
+    res.status(500).send("Error al obtener carrito");
   }
 });
 
 app.post("/agregarImgCarruselInicio", async (req, res) => {
   try {
-
     let uploadFile = req.files.uploadedFile;
     if (!uploadFile) {
-      return res.status(400).json({ error: "No se proporcionó ningún archivo." });
+      return res
+        .status(400)
+        .json({ error: "No se proporcionó ningún archivo." });
     }
 
     const bucket = admin.storage().bucket();
@@ -1023,12 +1062,14 @@ app.post("/agregarImgCarruselInicio", async (req, res) => {
 
     const carrusel = await Carrusel.findOne();
     if (carrusel.imagenID.length > 5) {
-      return res.status(400).json({ error: "Se alcanzó el límite máximo de 5 imágenes." });
+      return res
+        .status(400)
+        .json({ error: "Se alcanzó el límite máximo de 5 imágenes." });
     }
 
     const stream = storageFile.createWriteStream({
       metadata: {
-        contentType: uploadFile.mimetype
+        contentType: uploadFile.mimetype,
       },
     });
 
@@ -1039,23 +1080,23 @@ app.post("/agregarImgCarruselInicio", async (req, res) => {
 
     stream.on("finish", async () => {
       try {
-
         await storageFile.makePublic();
         const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
         carrusel.imagenID.push(publicUrl);
         await carrusel.save();
 
         return res.json({ success: true });
-
       } catch (error) {
         console.error(error);
-        return res.status(500).send({ error: error.message })
+        return res.status(500).send({ error: error.message });
       }
     });
 
     stream.end(uploadFile.data);
   } catch (error) {
-    res.status(500).json({ error: "Error al agregar imagenes " + error.message });
+    res
+      .status(500)
+      .json({ error: "Error al agregar imagenes " + error.message });
   }
 });
 
@@ -1064,13 +1105,16 @@ app.get("/obtenerCarruselInicio", async (req, res) => {
     console.log("Hola!!");
     const carruselData = await Carrusel.find({});
     if (!carruselData) {
-      return res.status(404).json({ error: "No se encontraron datos en el carrusel" });
+      return res
+        .status(404)
+        .json({ error: "No se encontraron datos en el carrusel" });
     }
 
     res.json(carruselData);
-
   } catch (error) {
-    res.status(500).send({ error: "Error al extraer las imagenes " + error.message })
+    res
+      .status(500)
+      .send({ error: "Error al extraer las imagenes " + error.message });
   }
 });
 
@@ -1083,21 +1127,28 @@ app.post("/eliminarImgCarruselInicio", async (req, res) => {
 
     const carrusel = await Carrusel.findOne();
     if (carrusel.imagenID.length < 2) {
-      return res.status(400).json({ error: "No se pueden eliminar imágenes, el limite minimo es de 2 imagenes" });
+      return res.status(400).json({
+        error:
+          "No se pueden eliminar imágenes, el limite minimo es de 2 imagenes",
+      });
     }
 
     const index = carrusel.imagenID.findIndex((url) => url === imageUrl);
     if (index !== -1) {
       carrusel.imagenID.splice(index, 1);
     } else {
-      return res.status(404).json({ error: "La imagen no se encontro en la lista" })
+      return res
+        .status(404)
+        .json({ error: "La imagen no se encontro en la lista" });
     }
     await carrusel.save();
 
     return res.json({ success: true });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error al eliminar la imagen " + error.message });
+    res
+      .status(500)
+      .json({ error: "Error al eliminar la imagen " + error.message });
   }
 });
 
@@ -1120,47 +1171,62 @@ app.put("/editarPoliticaPrivacidad", async (req, res) => {
     );
 
     if (!politicaActualizada) {
-      return res.status(404).json({ error: "Política de privacidad no encontrada" });
+      return res
+        .status(404)
+        .json({ error: "Política de privacidad no encontrada" });
     }
 
-    res.json({ mensaje: "Política de privacidad actualizada correctamente", politicaActualizada });
+    res.json({
+      mensaje: "Política de privacidad actualizada correctamente",
+      politicaActualizada,
+    });
   } catch (error) {
-    res.status(500).json({ error: "Error al editar la política de privacidad", message: error.message });
+    res.status(500).json({
+      error: "Error al editar la política de privacidad",
+      message: error.message,
+    });
   }
 });
 
-app.post('/send-complaint', (req, res) => {
+app.post("/send-complaint", (req, res) => {
   const { historia, datosPersonales } = req.body;
 
   try {
     let mailOptions = {
       from: process.env.EMAIL_USER,
-      to: 'importasiaquejas@gmail.com',
-      subject: 'Nueva Queja o Reclamo',
+      to: "importasiaquejas@gmail.com",
+      subject: "Nueva Queja o Reclamo",
       text: `Historia de la queja o reclamo: ${historia}\nNombre: ${datosPersonales.nombre}\nEdad: ${datosPersonales.edad}\nCorreo Electrónico: ${datosPersonales.email}`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
-        console.error('Error al enviar el correo:', error);
-        return res.status(500).json({ message: 'Error al enviar el correo', error: error.message });
+        console.error("Error al enviar el correo:", error);
+        return res
+          .status(500)
+          .json({ message: "Error al enviar el correo", error: error.message });
       }
-      console.log('Email enviado:', info.response);
-      res.status(200).json({ message: 'Correo enviado exitosamente' });
+      console.log("Email enviado:", info.response);
+      res.status(200).json({ message: "Correo enviado exitosamente" });
     });
   } catch (error) {
-    console.error('Error en el servidor:', error);
-    res.status(500).json({ message: 'Error en el servidor', error: error.message });
+    console.error("Error en el servidor:", error);
+    res
+      .status(500)
+      .json({ message: "Error en el servidor", error: error.message });
   }
 });
 
 app.post("/send-orderDetails", (req, res) => {
-  const { _orderId, tipoOrden, Fecha, carrito, cantidades, total, correo } = req.body;
+  const { _orderId, tipoOrden, Fecha, carrito, cantidades, total, correo } =
+    req.body;
 
   try {
     // Verifica si carrito y cantidades son arreglos, de lo contrario conviértelos en arreglos
     const carritoArray = Array.isArray(carrito) ? carrito : [carrito];
-    const cantidadesArray = Array.isArray(cantidades) ? cantidades : [cantidades];
+    const cantidadesArray = Array.isArray(cantidades)
+      ? cantidades
+      : [cantidades];
 
     let factura = `
       <html>
@@ -1168,6 +1234,7 @@ app.post("/send-orderDetails", (req, res) => {
           <style>
             body {
               font-family: Arial, sans-serif;
+              background-color: #fff; /* Fondo blanco para el cuerpo del correo */
             }
             .container {
               max-width: 600px;
@@ -1178,10 +1245,11 @@ app.post("/send-orderDetails", (req, res) => {
               background-color: #f9f9f9;
             }
             h1 {
+              color: #007bff; /* Azul */
               text-align: center;
             }
-            .details {
-              margin-bottom: 20px;
+            .details p, .total p {
+              color: #333; /* Texto oscuro para mejor contraste */
             }
             table {
               width: 100%;
@@ -1193,16 +1261,24 @@ app.post("/send-orderDetails", (req, res) => {
               text-align: left;
             }
             th {
-              background-color: #f2f2f2;
+              background-color: #007bff; /* Azul */
+              color: #ffffff; /* Texto blanco */
             }
             .total {
               margin-top: 20px;
               text-align: right;
             }
+            .logo-container {
+              text-align: center;
+              margin-bottom: 20px;
+            }
           </style>
         </head>
         <body>
           <div class="container">
+            <div class="logo-container">
+              <img src="https://firebasestorage.googleapis.com/v0/b/importasiaauth.appspot.com/o/OTROS%2Flogo.png?alt=media&token=94226c07-dba1-4395-8271-fef91fc03ad8" alt="Logo Empresa" style="width: 100px;"> <!-- Ajusta el width según sea necesario -->
+            </div>
             <h1>Detalles de la orden: ${_orderId}</h1>
             <div class="details">
               <p><strong>Tipo de orden:</strong> ${tipoOrden}</p>
@@ -1218,7 +1294,7 @@ app.post("/send-orderDetails", (req, res) => {
               <tbody>`;
 
     if (carritoArray.length !== cantidadesArray.length) {
-      throw new Error('El número de productos y cantidades no coincide.');
+      throw new Error("El número de productos y cantidades no coincide.");
     }
 
     for (let i = 0; i < carritoArray.length; i++) {
@@ -1248,22 +1324,26 @@ app.post("/send-orderDetails", (req, res) => {
 
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
-        console.error('Error al enviar el correo:', error);
-        return res.status(500).json({ message: 'Error al enviar el correo', error: error.message });
+        console.error("Error al enviar el correo:", error);
+        return res
+          .status(500)
+          .json({ message: "Error al enviar el correo", error: error.message });
       }
-      console.log('Email enviado:', info.response);
-      res.status(200).json({ message: 'Correo enviado exitosamente' });
+      console.log("Email enviado:", info.response);
+      res.status(200).json({ message: "Correo enviado exitosamente" });
     });
 
     // Por ahora, simplemente respondemos con un mensaje de éxito
     res.status(200).send("Orden recibida con éxito.");
   } catch (error) {
-    console.error('Error en el servidor:', error);
-    res.status(500).json({ message: 'Error en el servidor', error: error.message });
+    console.error("Error en el servidor:", error);
+    res
+      .status(500)
+      .json({ message: "Error en el servidor", error: error.message });
   }
 });
 
-app.post('/crearEntrega', async (req, res) => {
+app.post("/crearEntrega", async (req, res) => {
   try {
     const {
       departamento,
@@ -1276,7 +1356,8 @@ app.post('/crearEntrega', async (req, res) => {
       numerotelefono,
       nombreUsuario,
       identidadUsuario,
-      tipoOrden } = req.body;
+      tipoOrden,
+    } = req.body;
 
     const nuevaEntrega = new Entrega({
       departamento,
@@ -1295,11 +1376,13 @@ app.post('/crearEntrega', async (req, res) => {
     res.status(201).send(nuevaEntrega);
   } catch (error) {
     console.error("Error al crear entrega:", error);
-    res.status(500).json({ message: 'Error al crear entrega', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error al crear entrega", error: error.message });
   }
 });
 
-app.post('/crearOrden', async (req, res) => {
+app.post("/crearOrden", async (req, res) => {
   const { firebaseUID, detalles, estadoPago, Fecha } = req.body;
   const user = await Usuario.findOne({ firebaseUID: firebaseUID });
   if (!user) {
@@ -1328,14 +1411,13 @@ app.post('/crearOrden', async (req, res) => {
 
     await nuevaOrden.save();
     res.status(201).send(nuevaOrden);
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error en el servidor" });
   }
 });
 
-app.get('/obtenerCorreo', async (req, res) => {
+app.get("/obtenerCorreo", async (req, res) => {
   const { firebaseUID } = req.query;
   if (!firebaseUID) {
     return res.status(400).send("No se proporcionó firebaseUID");
@@ -1352,14 +1434,13 @@ app.get('/obtenerCorreo', async (req, res) => {
       nombre: user.nombre + " " + user.apellido,
       correo: user.correo,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error en el servidor" });
   }
 });
 
-app.get('/obtenerEntrega', async (req, res) => {
+app.get("/obtenerEntrega", async (req, res) => {
   const { _id } = req.query;
   try {
     const entrega = await Entrega.find({ _id });
@@ -1373,22 +1454,24 @@ app.get('/obtenerEntrega', async (req, res) => {
   }
 });
 
-app.get('/ordenes', async (req, res) => {
+app.get("/ordenes", async (req, res) => {
   try {
-    const todasLasOrdenes = await Orden.find().populate('detalles');
+    const todasLasOrdenes = await Orden.find().populate("detalles");
     res.status(200).json(todasLasOrdenes);
   } catch (error) {
     res.status(500).json({ mensaje: "Error al recuperar las ordenes", error });
   }
 });
 
-app.get('/ordenesUsuario', async (req, res) => {
+app.get("/ordenesUsuario", async (req, res) => {
   try {
     const { firebaseUID } = req.query;
-    const ordenes = await Orden.find({ firebaseUID }).populate('detalles');
+    const ordenes = await Orden.find({ firebaseUID }).populate("detalles");
 
     if (!ordenes) {
-      return res.status(404).json({ message: "No se encontraron ordenes para este usuario" });
+      return res
+        .status(404)
+        .json({ message: "No se encontraron ordenes para este usuario" });
     }
 
     res.status(200).json(ordenes);
@@ -1397,7 +1480,7 @@ app.get('/ordenesUsuario', async (req, res) => {
   }
 });
 
-app.post('/actualizarEstado', async (req, res) => {
+app.post("/actualizarEstado", async (req, res) => {
   try {
     const { estadoNuevo, _orderId } = req.body;
     const orden = await Orden.findOne({ _id: _orderId });
@@ -1409,40 +1492,56 @@ app.post('/actualizarEstado', async (req, res) => {
 
     res.status(200).json({ message: "Estado de la orden actualizado", orden });
   } catch (error) {
-    console.error('Error al actualizar el estado de la orden:', error);
-    res.status(500).json({ message: "Error al actualizar el estado de la orden", error });
+    console.error("Error al actualizar el estado de la orden:", error);
+    res
+      .status(500)
+      .json({ message: "Error al actualizar el estado de la orden", error });
   }
 });
-app.get('/consultarEstado', async (req, res) => {
-  console.log('Consulta de estado recibida'); // Para confirmar que el endpoint es alcanzado
+app.get("/consultarEstado", async (req, res) => {
+  console.log("Consulta de estado recibida"); // Para confirmar que el endpoint es alcanzado
   try {
-    console.log('Parámetros recibidos:', req.query); // Para ver los parámetros de consulta recibidos
+    console.log("Parámetros recibidos:", req.query); // Para ver los parámetros de consulta recibidos
     const { numeroPedido } = req.query;
     if (!numeroPedido) {
-      console.log('Número de pedido no proporcionado');
-      return res.status(400).json({ message: "Número de pedido no proporcionado" });
+      console.log("Número de pedido no proporcionado");
+      return res
+        .status(400)
+        .json({ message: "Número de pedido no proporcionado" });
     }
 
     console.log(`Buscando orden con número de pedido: ${numeroPedido}`);
     const orden = await Orden.findOne({ _id: numeroPedido });
 
     if (!orden) {
-      console.log(`Orden no encontrada para el número de pedido: ${numeroPedido}`);
+      console.log(
+        `Orden no encontrada para el número de pedido: ${numeroPedido}`
+      );
       return res.status(404).json({ message: "Orden no encontrada" });
     }
 
     console.log(`Orden encontrada: ${orden}`);
-    res.status(200).json({ message: `Hemos verificado tu orden y el estado es el siguiente: ${orden.estadoOrden}`, orden });
+    res.status(200).json({
+      message: `Hemos verificado tu orden y el estado es el siguiente: ${orden.estadoOrden}`,
+      orden,
+    });
   } catch (error) {
-    console.error('Error al consultar el estado de la orden:', error);
-    res.status(500).json({ message: "Error al consultar el estado de la orden", error });
+    console.error("Error al consultar el estado de la orden:", error);
+    res
+      .status(500)
+      .json({ message: "Error al consultar el estado de la orden", error });
   }
 });
 
-
-
-app.post('/agregarDireccion', async (req, res) => {
-  const { userFirebaseUID, departamento, municipio, direccion, puntoReferencia, numeroTelefono } = req.body;
+app.post("/agregarDireccion", async (req, res) => {
+  const {
+    userFirebaseUID,
+    departamento,
+    municipio,
+    direccion,
+    puntoReferencia,
+    numeroTelefono,
+  } = req.body;
   try {
     const direcciones = await Direccion.find({ userFirebaseUID });
     if (direcciones.length < 4) {
@@ -1452,21 +1551,26 @@ app.post('/agregarDireccion', async (req, res) => {
         municipio,
         direccion,
         puntoReferencia,
-        numeroTelefono
+        numeroTelefono,
       });
 
       await nuevaDir.save();
-      res.status(201).json({ message: 'Direccion agregada exitosamente', direccion: nuevaDir });
+      res.status(201).json({
+        message: "Direccion agregada exitosamente",
+        direccion: nuevaDir,
+      });
     } else {
       res.status(401).json({ message: "Maximo de direcciones alcanzadas" });
     }
-
   } catch (error) {
-    res.status(500).json({ message: 'Error al crear nueva direccion', error: error.message });
+    res.status(500).json({
+      message: "Error al crear nueva direccion",
+      error: error.message,
+    });
   }
 });
 
-app.get('/cargarDirecciones', async (req, res) => {
+app.get("/cargarDirecciones", async (req, res) => {
   const { userFirebaseUID } = req.query;
   try {
     const direcciones = await Direccion.find({ userFirebaseUID });
@@ -1476,11 +1580,13 @@ app.get('/cargarDirecciones', async (req, res) => {
       res.status(401).json({ message: "Error al obtener direcciones" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error al cargar direcciones", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error al cargar direcciones", error: error.message });
   }
 });
 
-app.get('/cargarDireccion', async (req, res) => {
+app.get("/cargarDireccion", async (req, res) => {
   const { _id } = req.query;
   try {
     const direccion = await Direccion.find({ _id });
@@ -1490,19 +1596,25 @@ app.get('/cargarDireccion', async (req, res) => {
       res.status(401).json({ message: "Error al obtener direccion" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error al cargar direccion", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error al cargar direccion", error: error.message });
   }
 });
 
-app.post('/usuarioAfterPago/:firebaseUID', async (req, res) => {
+app.post("/usuarioAfterPago/:firebaseUID", async (req, res) => {
   try {
     const { firebaseUID } = req.params;
     const updates = req.body;
 
-    const usuario = await Usuario.findOneAndUpdate({ firebaseUID: firebaseUID }, updates, { new: true });
+    const usuario = await Usuario.findOneAndUpdate(
+      { firebaseUID: firebaseUID },
+      updates,
+      { new: true }
+    );
 
     if (!usuario) {
-      return res.status(404).send('Usuario no encontrado');
+      return res.status(404).send("Usuario no encontrado");
     }
 
     res.send(usuario);
@@ -1511,41 +1623,52 @@ app.post('/usuarioAfterPago/:firebaseUID', async (req, res) => {
   }
 });
 
-app.delete('/eliminarOrden', async (req, res) => {
+app.delete("/eliminarOrden", async (req, res) => {
   const { ordenId } = req.query;
 
   if (!ordenId) {
-    return res.status(400).json({ error: "Se requiere el ID de la orden para eliminarla" });
+    return res
+      .status(400)
+      .json({ error: "Se requiere el ID de la orden para eliminarla" });
   }
 
   try {
     const resultado = await Orden.findByIdAndDelete(ordenId);
 
     if (!resultado) {
-      return res.status(404).json({ mensaje: "Orden no encontrada o ya fue eliminada" });
+      return res
+        .status(404)
+        .json({ mensaje: "Orden no encontrada o ya fue eliminada" });
     }
 
     res.status(200).json({ mensaje: "Orden eliminada exitosamente" });
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al eliminar la orden", error: error.message });
+    res
+      .status(500)
+      .json({ mensaje: "Error al eliminar la orden", error: error.message });
   }
 });
 
-app.delete('/eliminarDireccion', async (req, res) => {
+app.delete("/eliminarDireccion", async (req, res) => {
   const { _id } = req.query;
   try {
     const result = await Direccion.deleteOne({ _id });
     if (result.deletedCount === 0) {
-      res.status(401).json({ message: "No se pudo eliminar la direccion de manera correcta" });
+      res.status(401).json({
+        message: "No se pudo eliminar la direccion de manera correcta",
+      });
     }
     res.status(201).json({ message: "Direccion eliminada correctamente" });
   } catch (error) {
-    res.status(500).json({ message: "Error al eliminar direccion", error: error.message })
+    res
+      .status(500)
+      .json({ message: "Error al eliminar direccion", error: error.message });
   }
 });
 
-app.post('/agregarResena', async (req, res) => {
-  const { userFirebaseUID, Modelo, Calificacion, Titulo, Comentario } = req.body;
+app.post("/agregarResena", async (req, res) => {
+  const { userFirebaseUID, Modelo, Calificacion, Titulo, Comentario } =
+    req.body;
   try {
     const usuario = await Usuario.findOne({ firebaseUID: userFirebaseUID });
     if (usuario) {
@@ -1554,7 +1677,7 @@ app.post('/agregarResena', async (req, res) => {
         Modelo,
         Calificacion,
         Titulo,
-        Comentario
+        Comentario,
       });
 
       await nuevaResena.save();
@@ -1563,17 +1686,21 @@ app.post('/agregarResena', async (req, res) => {
       res.status(400).json({ message: "Error al cargar usuario" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error al agregar resena", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error al agregar resena", error: error.message });
   }
 });
 
-app.get('/cargarResenas', async (req, res) => {
+app.get("/cargarResenas", async (req, res) => {
   const { Modelo } = req.query;
   try {
     const resenas = await Resena.find({ Modelo });
     res.status(200).send(resenas);
   } catch (error) {
-    res.status(500).json({ message: "Error al cargar resenas", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error al cargar resenas", error: error.message });
   }
 });
 
@@ -1671,7 +1798,9 @@ app.post("/reducirCantidades", async (req, res) => {
       res.status(400).send("Error al obtener usuario");
     }
   } catch (error) {
-    res.status(500).json({ message: "Error al reducir cantidades", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error al reducir cantidades", error: error.message });
   }
 });
 
