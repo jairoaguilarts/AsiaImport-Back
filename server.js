@@ -1274,47 +1274,46 @@ app.post("/send-orderDetails", (req, res) => {
           </style>
         </head>
         <body>
-        <div class="container">
-        <div class="logo-container">
-          <img src="https://firebasestorage.googleapis.com/v0/b/importasiaauth.appspot.com/o/OTROS%2Flogo.png?alt=media&token=94226c07-dba1-4395-8271-fef91fc03ad8" alt="Logo Empresa" style="width: 100px;">
-        </div>
-        <h1>Detalles de la orden: ${_orderId}</h1>
-        <div class="details">
-          <p><strong>Tipo de orden:</strong> ${tipoOrden}</p>
-          <p><strong>Fecha:</strong> ${Fecha}</p>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Imagen</th>
-              <th>Cantidad</th>
-              <th>Precio</th>
-            </tr>
-          </thead>
-          <tbody>`;
+          <div class="container">
+            <div class="logo-container">
+              <img src="https://firebasestorage.googleapis.com/v0/b/importasiaauth.appspot.com/o/OTROS%2Flogo.png?alt=media&token=94226c07-dba1-4395-8271-fef91fc03ad8" alt="Logo Empresa" style="width: 100px;"> <!-- Ajusta el width según sea necesario -->
+            </div>
+            <h1>Detalles de la orden: ${_orderId}</h1>
+            <div class="details">
+              <p><strong>Tipo de orden:</strong> ${tipoOrden}</p>
+              <p><strong>Fecha:</strong> ${Fecha}</p>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                </tr>
+              </thead>
+              <tbody>`;
 
-    carritoArray.forEach((producto, index) => {
+    if (carritoArray.length !== cantidadesArray.length) {
+      throw new Error("El número de productos y cantidades no coincide.");
+    }
+
+    for (let i = 0; i < carritoArray.length; i++) {
       factura += `
-    <tr>
-      <td>${producto.Nombre}</td>
-      <td><img src="${producto.ImagenID}" alt="Producto" style="width:50px; height:50px;"></td>
-      <td>${cantidadesArray[index]}</td>
-      <td>${producto.Precio}</td>
-    </tr>`;
-    });
+        <tr>
+          <td>${carritoArray[i]}</td>
+          <td>${cantidadesArray[i]}</td>
+        </tr>`;
+    }
 
     factura += `
-          </tbody>
-        </table>
-        <div class="total">
-          <p><strong>Total:</strong> ${total}</p>
-        </div>
-      </div>
-    </body>
-  </html>`;
+              </tbody>
+            </table>
+            <div class="total">
+              <p><strong>Total:</strong> ${total}</p>
+            </div>
+          </div>
+        </body>
+      </html>`;
 
-    // Configuración y envío del correo electrónico
     let mailOptions = {
       from: process.env.EMAIL_USER,
       to: correo,
@@ -1329,9 +1328,12 @@ app.post("/send-orderDetails", (req, res) => {
           .status(500)
           .json({ message: "Error al enviar el correo", error: error.message });
       }
-      console.log("Email enviado: ", info.response);
+      console.log("Email enviado:", info.response);
       res.status(200).json({ message: "Correo enviado exitosamente" });
     });
+
+    // Por ahora, simplemente respondemos con un mensaje de éxito
+    res.status(200).send("Orden recibida con éxito.");
   } catch (error) {
     console.error("Error en el servidor:", error);
     res
@@ -1339,6 +1341,8 @@ app.post("/send-orderDetails", (req, res) => {
       .json({ message: "Error en el servidor", error: error.message });
   }
 });
+
+
 
 app.post("/crearEntrega", async (req, res) => {
   try {
