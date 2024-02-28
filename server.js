@@ -1286,8 +1286,11 @@ app.post("/send-orderDetails", (req, res) => {
             <table>
               <thead>
                 <tr>
-                  <th>Producto</th>
-                  <th>Cantidad</th>
+                <th>Articulo</th>
+                <th>Producto</th>
+                <th>Imagen</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
                 </tr>
               </thead>
               <tbody>`;
@@ -1299,8 +1302,11 @@ app.post("/send-orderDetails", (req, res) => {
     for (let i = 0; i < carritoArray.length; i++) {
       factura += `
         <tr>
+          <td>${carritoArray[i].Nombre}</td>
           <td>${carritoArray[i]}</td>
+          <td>${carritoArray[i].imagenID}</td>
           <td>${cantidadesArray[i]}</td>
+          <td>${carritoArray[i].Precio}</td>
         </tr>`;
     }
 
