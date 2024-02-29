@@ -1217,7 +1217,7 @@ app.post("/send-complaint", (req, res) => {
   }
 });
 
-app.post("/send-orderDetails", (req, res) => {
+app.post("/send-orderDetails", async (req, res) => {
   const { _orderId, tipoOrden, Fecha, carrito, cantidades, total, correo } =
     req.body;
   try {
@@ -1226,6 +1226,15 @@ app.post("/send-orderDetails", (req, res) => {
     const cantidadesArray = Array.isArray(cantidades)
       ? cantidades
       : [cantidades];
+
+    let productos = [];
+
+    for (let i = 0; i < carritoArray; i++) {
+      const producto = await Producto.findOne({ Modelo: carritoArray[i] })
+      if (producto) {
+        productos.push(producto);
+      }
+    }
 
     let factura = `
       <html>
@@ -1302,11 +1311,11 @@ app.post("/send-orderDetails", (req, res) => {
     for (let i = 0; i < carritoArray.length; i++) {
       factura += `
         <tr>
-          <td>${carritoArray[i].Nombre}</td>
+          <td>${productos[i].Nombre}</td>
           <td>${carritoArray[i]}</td>
-          <td>${carritoArray[i].imagenID}</td>
+          <td>${productos[i].ImagenID[0]}</td>
           <td>${cantidadesArray[i]}</td>
-          <td>${carritoArray[i].Precio}</td>
+          <td>${productos[i].Precio}</td>
         </tr>`;
     }
 
