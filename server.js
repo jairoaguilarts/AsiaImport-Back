@@ -1313,7 +1313,7 @@ app.post("/send-orderDetails", async (req, res) => {
         <tr>
           <td>${productos[i].Nombre}</td>
           <td>${carritoArray[i]}</td>
-          <td><img src={${productos[i].ImagenID[0]}} alt={producto.Nombre} /></td>
+          <td><img src="${productos[i].ImagenID}" alt="${productos[i].Nombre}" /></td>
           <td>${cantidadesArray[i]}</td>
           <td>${productos[i].Precio}</td>
         </tr>`;
