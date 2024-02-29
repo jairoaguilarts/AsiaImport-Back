@@ -1815,8 +1815,8 @@ app.get("/obtenerTotalCompra", async (req, res) => {
   const { firebaseUID } = req.query;
   try {
     const user = await Usuario.findOne({ firebaseUID });
-    if(user) {
-      res.status(201).send(user.totalCarrito);
+    if (user) {
+      res.status(201).json({ total: user.totalCarrito });
     } else {
       res.status(401).send("Error al encontrar el usuario");
     }
