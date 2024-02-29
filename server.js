@@ -1811,6 +1811,20 @@ app.post("/reducirCantidades", async (req, res) => {
   }
 });
 
+app.get("/obtenerTotalCompra", async (req, res) => {
+  const { firebaseUID } = req.query;
+  try {
+    const user = await Usuario.findOne({ firebaseUID });
+    if(user) {
+      res.status(201).send(user.totalCarrito);
+    } else {
+      res.status(401).send("Error al encontrar el usuario");
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener total", error: error.message });
+  }
+});
+
 app.get("/checkout", (req, res) => res.send("checkout"));
 app.get("/success", (req, res) => res.send("success"));
 app.get("/cancel", (req, res) => res.send("cancel"));
