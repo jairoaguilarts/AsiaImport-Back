@@ -1229,8 +1229,8 @@ app.post("/send-orderDetails", async (req, res) => {
 
     let productos = [];
 
-    for (let i = 0; i < carritoArray.length; i++) {
-      const producto = await Producto.find({ Modelo: carritoArray[i] })
+    for (const modelo of carritoArray) {
+      const producto = await Producto.findOne({ Modelo: modelo });
       if (producto) {
         productos.push(producto);
       }
