@@ -1233,6 +1233,9 @@ app.post("/send-orderDetails", async (req, res) => {
       const producto = await Producto.findOne({ Modelo: modelo });
       if (producto) {
         productos.push(producto);
+      } else {
+        console.error(`Producto con modelo ${modelo} no encontrado.`);
+        return res.status(404).json({ message: `Producto con modelo ${modelo} no encontrado.` });
       }
     }
 
@@ -1308,17 +1311,17 @@ app.post("/send-orderDetails", async (req, res) => {
       throw new Error("El número de productos y cantidades no coincide.");
     }
 
-    for (let i = 0; i < carritoArray.length; i++) {
-      const imageSrc = productos[i].ImagenID ? productos[i].ImagenID : 'URL_DE_IMAGEN_DE_FALLBACK';
+    productos.forEach((producto, index) => {
+      const imageSrc = producto.ImagenID; 
       factura += `
         <tr>
-          <td>${productos[i].Nombre}</td>
-          <td>${carritoArray[i]}</td>
-          <td><img src="${imageSrc}" alt="${productos[i].Nombre}" style="width: 100px; height: auto; max-width: 100%; height: auto; display: block; margin-left: auto; margin-right: auto;" onerror="this.onerror=null;this.src='URL_DE_IMAGEN_DE_FALLBACK';"/></td>
-          <td>${cantidadesArray[i]}</td>
-          <td>${productos[i].Precio}</td>
+          <td>${producto.Nombre}</td>
+          <td>${carritoArray[index]}</td>
+          <td><img src="${imageSrc}" alt="${producto.Nombre}" style="width: 100px; height: auto; max-width: 100%; object-fit: contain;" /></td>
+          <td>${cantidadesArray[index]}</td>
+          <td>${producto.Precio}</td>
         </tr>`;
-    }
+    });
     
     
 
