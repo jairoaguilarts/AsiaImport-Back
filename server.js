@@ -1309,15 +1309,17 @@ app.post("/send-orderDetails", async (req, res) => {
     }
 
     for (let i = 0; i < carritoArray.length; i++) {
+      const imageSrc = productos[i].ImagenID ? productos[i].ImagenID : 'URL_DE_IMAGEN_DE_FALLBACK';
       factura += `
         <tr>
           <td>${productos[i].Nombre}</td>
           <td>${carritoArray[i]}</td>
-          <td><img src="${productos[i].ImagenID}" alt="${productos[i].Nombre}" style="width: 100px; height: auto;" /></td> <!-- Ajusta el tamaño aquí -->
+          <td><img src="${imageSrc}" alt="${productos[i].Nombre}" style="width: 100px; height: auto; max-width: 100%; height: auto; display: block; margin-left: auto; margin-right: auto;" onerror="this.onerror=null;this.src='URL_DE_IMAGEN_DE_FALLBACK';"/></td>
           <td>${cantidadesArray[i]}</td>
           <td>${productos[i].Precio}</td>
         </tr>`;
     }
+    
     
 
     factura += `
