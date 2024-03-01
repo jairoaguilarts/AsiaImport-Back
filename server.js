@@ -39,17 +39,15 @@ const {
 
 const app = express();
 const PORT = 3000 || process.env.PORT;
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(fileUpload());
-
 const corsOptions = {
   origin: ["https://importasiahn.netlify.app", "http://localhost:3001"],
   optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(fileUpload());
 
 const connectDB = async () => {
   await mongoose
