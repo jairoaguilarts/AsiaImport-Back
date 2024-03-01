@@ -1217,10 +1217,9 @@ app.post("/send-complaint", (req, res) => {
   }
 });
 
-app.post("/send-orderDetails", (req, res) => {
+app.post("/send-orderDetails", async (req, res) => {
   const { _orderId, tipoOrden, Fecha, carrito, cantidades, total, correo } =
     req.body;
-
   try {
     // Verifica si carrito y cantidades son arreglos, de lo contrario conviértelos en arreglos
     const carritoArray = Array.isArray(carrito) ? carrito : [carrito];
@@ -1228,12 +1227,25 @@ app.post("/send-orderDetails", (req, res) => {
       ? cantidades
       : [cantidades];
 
+    let productos = [];
+
+    for (const modelo of carritoArray) {
+      const producto = await Producto.findOne({ Modelo: modelo });
+      if (producto) {
+        productos.push(producto);
+      } else {
+        console.error(`Producto con modelo ${modelo} no encontrado.`);
+        return res.status(404).json({ message: `Producto con modelo ${modelo} no encontrado.` });
+      }
+    }
+
     let factura = `
       <html>
         <head>
           <style>
             body {
               font-family: Arial, sans-serif;
+              background-color: #fff; /* Fondo blanco para el cuerpo del correo */
             }
             .container {
               max-width: 600px;
@@ -1244,10 +1256,11 @@ app.post("/send-orderDetails", (req, res) => {
               background-color: #f9f9f9;
             }
             h1 {
+              color: #007bff; /* Azul */
               text-align: center;
             }
-            .details {
-              margin-bottom: 20px;
+            .details p, .total p {
+              color: #333; /* Texto oscuro para mejor contraste */
             }
             table {
               width: 100%;
@@ -1259,16 +1272,24 @@ app.post("/send-orderDetails", (req, res) => {
               text-align: left;
             }
             th {
-              background-color: #f2f2f2;
+              background-color: #007bff; /* Azul */
+              color: #ffffff; /* Texto blanco */
             }
             .total {
               margin-top: 20px;
               text-align: right;
             }
+            .logo-container {
+              text-align: center;
+              margin-bottom: 20px;
+            }
           </style>
         </head>
         <body>
           <div class="container">
+            <div class="logo-container">
+              <img src="https://firebasestorage.googleapis.com/v0/b/importasiaauth.appspot.com/o/OTROS%2Flogo.png?alt=media&token=94226c07-dba1-4395-8271-fef91fc03ad8" alt="Logo Empresa" style="width: 100px;"> <!-- Ajusta el width según sea necesario -->
+            </div>
             <h1>Detalles de la orden: ${_orderId}</h1>
             <div class="details">
               <p><strong>Tipo de orden:</strong> ${tipoOrden}</p>
@@ -1277,8 +1298,11 @@ app.post("/send-orderDetails", (req, res) => {
             <table>
               <thead>
                 <tr>
-                  <th>Producto</th>
-                  <th>Cantidad</th>
+                <th>Articulo</th>
+                <th>Producto</th>
+                <th>Imagen</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
                 </tr>
               </thead>
               <tbody>`;
@@ -1287,13 +1311,19 @@ app.post("/send-orderDetails", (req, res) => {
       throw new Error("El número de productos y cantidades no coincide.");
     }
 
-    for (let i = 0; i < carritoArray.length; i++) {
+    productos.forEach((producto, index) => {
+      const imageSrc = producto.ImagenID; 
       factura += `
         <tr>
-          <td>${carritoArray[i]}</td>
-          <td>${cantidadesArray[i]}</td>
+          <td>${producto.Nombre}</td>
+          <td>${carritoArray[index]}</td>
+          <td><img src="${imageSrc}" alt="${producto.Nombre}" style="width: 100px; height: auto; max-width: 100%; object-fit: contain;" /></td>
+          <td>${cantidadesArray[index]}</td>
+          <td>${producto.Precio}</td>
         </tr>`;
-    }
+    });
+    
+    
 
     factura += `
               </tbody>
@@ -1332,6 +1362,8 @@ app.post("/send-orderDetails", (req, res) => {
       .json({ message: "Error en el servidor", error: error.message });
   }
 });
+
+
 
 app.post("/crearEntrega", async (req, res) => {
   try {
@@ -1401,21 +1433,6 @@ app.post("/crearOrden", async (req, res) => {
 
     await nuevaOrden.save();
     res.status(201).send(nuevaOrden);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: "Error en el servidor" });
-  }
-});
-app.put("/ordenId", async (req, res) => {
-  const { _id, ordenId } = req.body;
-  const orden = await Orden.findOne({ _id: _id });
-  if (!orden) {
-    return res.status(404).send("Orden no encontrada");
-  }
-  try {
-    orden.ordenId = ordenId;
-    await orden.save();
-    res.json({ mensaje: "Orden actualizada", orden });
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error en el servidor" });
@@ -1806,6 +1823,20 @@ app.post("/reducirCantidades", async (req, res) => {
     res
       .status(500)
       .json({ message: "Error al reducir cantidades", error: error.message });
+  }
+});
+
+app.get("/obtenerTotalCompra", async (req, res) => {
+  const { firebaseUID } = req.query;
+  try {
+    const user = await Usuario.findOne({ firebaseUID });
+    if (user) {
+      res.status(201).json({ total: user.totalCarrito });
+    } else {
+      res.status(401).send("Error al encontrar el usuario");
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener total", error: error.message });
   }
 });
 
