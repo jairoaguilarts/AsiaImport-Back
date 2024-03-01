@@ -1436,6 +1436,21 @@ app.post("/crearOrden", async (req, res) => {
     res.status(500).json({ mensaje: "Error en el servidor" });
   }
 });
+app.put("/ordenId", async (req, res) => {
+  const { _id, ordenId } = req.body;
+  const orden = await Orden.findOne({ _id: _id });
+  if (!orden) {
+    return res.status(404).send("Orden no encontrada");
+  }
+  try {
+    orden.ordenId = ordenId;
+    await orden.save();
+    res.json({ mensaje: "Orden actualizada", orden });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error en el servidor" });
+  }
+});
 
 app.get("/obtenerCorreo", async (req, res) => {
   const { firebaseUID } = req.query;
