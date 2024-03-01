@@ -1235,7 +1235,9 @@ app.post("/send-orderDetails", async (req, res) => {
         productos.push(producto);
       } else {
         console.error(`Producto con modelo ${modelo} no encontrado.`);
-        return res.status(404).json({ message: `Producto con modelo ${modelo} no encontrado.` });
+        return res
+          .status(404)
+          .json({ message: `Producto con modelo ${modelo} no encontrado.` });
       }
     }
 
@@ -1312,7 +1314,7 @@ app.post("/send-orderDetails", async (req, res) => {
     }
 
     productos.forEach((producto, index) => {
-      const imageSrc = producto.ImagenID; 
+      const imageSrc = producto.ImagenID;
       factura += `
         <tr>
           <td>${producto.Nombre}</td>
@@ -1322,8 +1324,6 @@ app.post("/send-orderDetails", async (req, res) => {
           <td>${producto.Precio}</td>
         </tr>`;
     });
-    
-    
 
     factura += `
               </tbody>
@@ -1362,8 +1362,6 @@ app.post("/send-orderDetails", async (req, res) => {
       .json({ message: "Error en el servidor", error: error.message });
   }
 });
-
-
 
 app.post("/crearEntrega", async (req, res) => {
   try {
@@ -1836,7 +1834,9 @@ app.get("/obtenerTotalCompra", async (req, res) => {
       res.status(401).send("Error al encontrar el usuario");
     }
   } catch (error) {
-    res.status(500).json({ message: "Error al obtener total", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error al obtener total", error: error.message });
   }
 });
 
