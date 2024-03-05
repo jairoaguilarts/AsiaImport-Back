@@ -1313,25 +1313,29 @@ app.post("/send-orderDetails", async (req, res) => {
 
     productos.forEach((producto, index) => {
       const imageSrc = producto.ImagenID;
+      const precioFormateado = `${parseFloat(producto.Precio).toFixed(2)} Lps`;
       factura += `
         <tr>
           <td>${producto.Nombre}</td>
           <td>${carritoArray[index]}</td>
           <td><img src="${imageSrc}" alt="${producto.Nombre}" style="width: 100px; height: auto; max-width: 100%; object-fit: contain;" /></td>
           <td>${cantidadesArray[index]}</td>
-          <td>${producto.Precio}</td>
+          <td>${precioFormateado}</td>
         </tr>`;
     });
-
+    
+    // Asegúrate de formatear también el total de la misma manera
+    const totalFormateado = `${parseFloat(total).toFixed(2)} Lps`;
     factura += `
               </tbody>
             </table>
             <div class="total">
-              <p><strong>Total:</strong> ${total}</p>
+              <p><strong>Total:</strong> ${totalFormateado}</p>
             </div>
           </div>
         </body>
       </html>`;
+    
 
     let mailOptions = {
       from: process.env.EMAIL_USER,
