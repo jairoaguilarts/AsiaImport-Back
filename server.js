@@ -1318,11 +1318,16 @@ app.post("/send-orderDetails", async (req, res) => {
         <tr>
           <td>${producto.Nombre}</td>
           <td>${carritoArray[index]}</td>
-          <td><img src="${imageSrc}" alt="${producto.Nombre}" style="width: 100px; height: auto; max-width: 100%; object-fit: contain;" /></td>
+          <td>
+            <div style="width: 100px; height: 100px; display: flex; align-items: center; justify-content: center;">
+              <img src="${imageSrc}" alt="${producto.Nombre}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+            </div>
+          </td>
           <td>${cantidadesArray[index]}</td>
           <td>${precioFormateado}</td>
         </tr>`;
     });
+    
     
     // Asegúrate de formatear también el total de la misma manera
     const totalFormateado = `${parseFloat(total).toFixed(2)} Lps`;
