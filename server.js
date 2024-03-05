@@ -1219,7 +1219,6 @@ app.post("/send-orderDetails", async (req, res) => {
   const { _orderId, tipoOrden, Fecha, carrito, cantidades, total, correo } =
     req.body;
   try {
-    // Verifica si carrito y cantidades son arreglos, de lo contrario conviértelos en arreglos
     const carritoArray = Array.isArray(carrito) ? carrito : [carrito];
     const cantidadesArray = Array.isArray(cantidades)
       ? cantidades
@@ -1239,13 +1238,17 @@ app.post("/send-orderDetails", async (req, res) => {
       }
     }
 
+    if (carritoArray.length !== cantidadesArray.length) {
+      throw new Error("El número de productos y cantidades no coincide.");
+    }
+
     let factura = `
       <html>
         <head>
           <style>
             body {
               font-family: Arial, sans-serif;
-              background-color: #fff; /* Fondo blanco para el cuerpo del correo */
+              background-color: #fff;
             }
             .container {
               max-width: 600px;
@@ -1256,11 +1259,11 @@ app.post("/send-orderDetails", async (req, res) => {
               background-color: #f9f9f9;
             }
             h1 {
-              color: #007bff; /* Azul */
+              color: #007bff;
               text-align: center;
             }
             .details p, .total p {
-              color: #333; /* Texto oscuro para mejor contraste */
+              color: #333;
             }
             table {
               width: 100%;
@@ -1270,10 +1273,11 @@ app.post("/send-orderDetails", async (req, res) => {
               border: 1px solid #ddd;
               padding: 8px;
               text-align: left;
+              vertical-align: middle;
             }
             th {
-              background-color: #007bff; /* Azul */
-              color: #ffffff; /* Texto blanco */
+              background-color: #007bff;
+              color: #ffffff;
             }
             .total {
               margin-top: 20px;
@@ -1283,12 +1287,17 @@ app.post("/send-orderDetails", async (req, res) => {
               text-align: center;
               margin-bottom: 20px;
             }
+            img {
+              max-width: 100px;
+              max-height: 100px;
+              object-fit: contain;
+            }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="logo-container">
-              <img src="https://firebasestorage.googleapis.com/v0/b/importasiaauth.appspot.com/o/OTROS%2Flogo.png?alt=media&token=94226c07-dba1-4395-8271-fef91fc03ad8" alt="Logo Empresa" style="width: 100px;"> <!-- Ajusta el width según sea necesario -->
+              <img src="https://firebasestorage.googleapis.com/v0/b/importasiaauth.appspot.com/o/OTROS%2Flogo.png?alt=media&token=94226c07-dba1-4395-8271-fef91fc03ad8" alt="Logo Empresa" style="width: 100px;">
             </div>
             <h1>Detalles de la orden: ${_orderId}</h1>
             <div class="details">
@@ -1298,18 +1307,14 @@ app.post("/send-orderDetails", async (req, res) => {
             <table>
               <thead>
                 <tr>
-                <th>Articulo</th>
-                <th>Producto</th>
-                <th>Imagen</th>
-                <th>Cantidad</th>
-                <th>Precio</th>
+                  <th>Articulo</th>
+                  <th>Producto</th>
+                  <th>Imagen</th>
+                  <th>Cantidad</th>
+                  <th>Precio</th>
                 </tr>
               </thead>
               <tbody>`;
-
-    if (carritoArray.length !== cantidadesArray.length) {
-      throw new Error("El número de productos y cantidades no coincide.");
-    }
 
     productos.forEach((producto, index) => {
       const imageSrc = producto.ImagenID;
@@ -1319,17 +1324,13 @@ app.post("/send-orderDetails", async (req, res) => {
           <td>${producto.Nombre}</td>
           <td>${carritoArray[index]}</td>
           <td>
-            <div style="width: 100px; height: 100px; display: flex; align-items: center; justify-content: center;">
-              <img src="${imageSrc}" alt="${producto.Nombre}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
-            </div>
+            <img src="${imageSrc}" alt="${producto.Nombre}" />
           </td>
           <td>${cantidadesArray[index]}</td>
           <td>${precioFormateado}</td>
         </tr>`;
     });
-    
-    
-    // Asegúrate de formatear también el total de la misma manera
+
     const totalFormateado = `${parseFloat(total).toFixed(2)} Lps`;
     factura += `
               </tbody>
@@ -1340,7 +1341,6 @@ app.post("/send-orderDetails", async (req, res) => {
           </div>
         </body>
       </html>`;
-    
 
     let mailOptions = {
       from: process.env.EMAIL_USER,
