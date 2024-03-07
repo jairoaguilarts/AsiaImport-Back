@@ -1317,7 +1317,7 @@ app.post("/send-orderDetails", async (req, res) => {
               <tbody>`;
 
     productos.forEach((producto, index) => {
-      const imageSrc = producto.ImagenID;
+      let imageSrc = encodeURI(producto.ImagenID);
       const precioFormateado = `${parseFloat(producto.Precio).toFixed(2)} Lps`;
       factura += `
         <tr>
