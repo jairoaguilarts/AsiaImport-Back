@@ -1554,7 +1554,7 @@ app.get("/consultarEstado", async (req, res) => {
     }
 
     console.log(`Buscando orden con número de pedido: ${numeroPedido}`);
-    const orden = await Orden.findOne({ _id: numeroPedido });
+    const orden = await Orden.findOne({ ordenId: numeroPedido });
 
     if (!orden) {
       console.log(
