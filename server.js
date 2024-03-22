@@ -1553,7 +1553,7 @@ app.get("/consultarEstado", async (req, res) => {
     }
 
     console.log(`Buscando orden con número de pedido: ${numeroPedido}`);
-    const orden = await Orden.findOne({ _id: numeroPedido });
+    const orden = await Orden.findOne({ ordenId: numeroPedido });
 
     if (!orden) {
       console.log(
@@ -1574,42 +1574,6 @@ app.get("/consultarEstado", async (req, res) => {
       .json({ message: "Error al consultar el estado de la orden", error });
   }
 });
-app.get("/consultarEstado2", async (req, res) => {
-  console.log("Consulta de estado recibida"); // Para confirmar que el endpoint es alcanzado
-  try {
-    console.log("Parámetros recibidos:", req.query); // Para ver los parámetros de consulta recibidos
-    const { numeroPedido } = req.query;
-    if (!numeroPedido || numeroPedido.length < 4) { // Verifica que se proporcionen al menos 4 caracteres del número de pedido
-      console.log("Número de pedido no válido");
-      return res
-        .status(400)
-        .json({ message: "Número de pedido no válido" });
-    }
-
-    console.log(`Buscando orden con las últimas 4 letras del número de pedido: ${numeroPedido}`);
-    // Buscar orden utilizando solo las últimas 4 letras del ID
-    const orden = await Orden.findOne({ _id: { $regex: `${numeroPedido}$`, $options: 'i' } });
-
-    if (!orden) {
-      console.log(
-        `Orden no encontrada para las últimas 4 letras del número de pedido: ${numeroPedido}`
-      );
-      return res.status(404).json({ message: "Orden no encontrada" });
-    }
-
-    console.log(`Orden encontrada: ${orden}`);
-    res.status(200).json({
-      message: `Hemos verificado tu orden y el estado es el siguiente: ${orden.estadoOrden}`,
-      orden,
-    });
-  } catch (error) {
-    console.error("Error al consultar el estado de la orden:", error);
-    res
-      .status(500)
-      .json({ message: "Error al consultar el estado de la orden", error });
-  }
-});
-
 
 app.post("/agregarDireccion", async (req, res) => {
   const {
