@@ -1578,8 +1578,14 @@ app.get("/consultarEstado", async (req, res) => {
 
 app.put("/addPenvio", async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.query.id;
     const { precioEnvio, precioEnvioOtros } = req.body;
+
+    if (!id) {
+      return res
+        .status(400)
+        .send("El ID es necesario para actualizar la información.");
+    }
 
     const updatedInfo = await Infog.findByIdAndUpdate(
       id,
