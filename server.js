@@ -796,8 +796,9 @@ app.get("/obtenerInformacion", async (req, res) => {
         .json({ error: "Información de la empresa no encontrada" });
     }
 
-    const { mision, vision, historia } = infoEmpresa;
-    res.json({ mision, vision, historia });
+    const { mision, vision, historia, precioEnvio, precioEnvioOtros } =
+      infoEmpresa;
+    res.json({ mision, vision, historia, precioEnvio, precioEnvioOtros });
   } catch (error) {
     res.status(500).json({
       error: "Error al cargar la información de la empresa",
@@ -1572,6 +1573,38 @@ app.get("/consultarEstado", async (req, res) => {
     res
       .status(500)
       .json({ message: "Error al consultar el estado de la orden", error });
+  }
+});
+
+app.put("/addPenvio", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { precioEnvio, precioEnvioOtros } = req.body;
+
+    const updatedInfo = await Infog.findByIdAndUpdate(
+      id,
+      { $set: { precioEnvio, precioEnvioOtros } },
+      { new: true }
+    );
+
+    if (!updatedInfo) {
+      return res
+        .status(404)
+        .send("No se encontró el registro con el ID proporcionado.");
+    }
+
+    res.status(200).send(updatedInfo);
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
+
+app.get("/obtPEntrega", async (req, res) => {
+  try {
+    const info = await Infog.find().select("precioEnvio precioEnvioOtros");
+    res.status(200).send(info);
+  } catch (error) {
+    res.status(400).send(error);
   }
 });
 

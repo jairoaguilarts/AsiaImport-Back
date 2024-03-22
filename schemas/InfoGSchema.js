@@ -13,6 +13,14 @@ const InfoGSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  precioEnvio: {
+    type: Number,
+    required: true,
+  },
+  precioEnvioOtros: {
+    type: Number,
+    required: true,
+  },
 });
 
 const Infog = mongoose.model("infog", InfoGSchema);
